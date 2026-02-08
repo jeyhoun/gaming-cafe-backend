@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:15
+    container_name: gaming-cafe-db
+    restart: always
+    environment:
+      POSTGRES_DB: gaming_cafe_db
+      POSTGRES_USER: gaming_cafe_user
+      POSTGRES_PASSWORD: "gaming_cafe_p@ssw@rd"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - gaming-cafe-network
+
+volumes:
+  pg_data:
+
+networks:
+  gaming-cafe-network:
