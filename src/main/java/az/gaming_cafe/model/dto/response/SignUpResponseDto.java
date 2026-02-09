@@ -7,14 +7,9 @@ public class SignUpResponseDto {
     private Long id;
     private String username;
     private String email;
-    private String token;
-
-    public SignUpResponseDto(Long id, String username, String email, String token) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.token = token;
-    }
+    private String accessToken;
+    private String refreshToken;
+    private Long expiresIn;
 
     public Long getId() {
         return id;
@@ -40,12 +35,28 @@ public class SignUpResponseDto {
         this.email = email;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String token) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public Long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(Long expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
     public SignUpResponseDto() {
@@ -57,6 +68,15 @@ public class SignUpResponseDto {
         this.email = email;
     }
 
+    public SignUpResponseDto(Long id, String username, String email, String accessToken, String refreshToken, Long expiresIn) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -65,8 +85,9 @@ public class SignUpResponseDto {
         private Long id;
         private String username;
         private String email;
-        private String token;
-        private String message;
+        private String accessToken;
+        private String refreshToken;
+        private Long expiresIn;
 
         public Builder id(Long id) {
             this.id = id;
@@ -83,13 +104,23 @@ public class SignUpResponseDto {
             return this;
         }
 
-        public Builder token(String token) {
-            this.token = token;
+        public Builder accessToken(String accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
+
+        public Builder refreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
+            return this;
+        }
+
+        public Builder expiresIn(Long expiresIn) {
+            this.expiresIn = expiresIn;
             return this;
         }
 
         public SignUpResponseDto build() {
-            return new SignUpResponseDto(id, username, email, token);
+            return new SignUpResponseDto(id, username, email, accessToken, refreshToken, expiresIn);
         }
     }
 
@@ -99,12 +130,14 @@ public class SignUpResponseDto {
         return Objects.equals(id, that.id)
                 && Objects.equals(username, that.username)
                 && Objects.equals(email, that.email)
-                && Objects.equals(token, that.token);
+                && Objects.equals(accessToken, that.accessToken)
+                && Objects.equals(refreshToken, that.refreshToken)
+                && Objects.equals(expiresIn, that.expiresIn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, email, token);
+        return Objects.hash(id, username, email, accessToken, refreshToken, expiresIn);
     }
 
     @Override
@@ -113,7 +146,9 @@ public class SignUpResponseDto {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", token='" + token + '\'' +
+                ", accessToken='" + accessToken + '\'' +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", expiresIn='" + expiresIn + '\'' +
                 '}';
     }
 }

@@ -7,7 +7,9 @@ public class SignInResponseDto {
     private Long id;
     private String username;
     private String email;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
+    private Long expiresIn;
 
     public Long getId() {
         return id;
@@ -33,22 +35,24 @@ public class SignInResponseDto {
         this.email = email;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public SignInResponseDto() {
     }
 
-    public SignInResponseDto(Long id, String username, String email, String token) {
+    public SignInResponseDto(Long id, String username, String email, String accessToken, String refreshToken, Long expiresIn) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.token = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
     }
 
     public static Builder builder() {
@@ -59,7 +63,9 @@ public class SignInResponseDto {
         private Long id;
         private String username;
         private String email;
-        private String token;
+        private String accessToken;
+        private String refreshToken;
+        private Long expiresIn;
 
         public Builder id(Long id) {
             this.id = id;
@@ -76,13 +82,23 @@ public class SignInResponseDto {
             return this;
         }
 
-        public Builder token(String token) {
-            this.token = token;
+        public Builder accessToken(String accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
+
+        public Builder refreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
+            return this;
+        }
+
+        public Builder expiresIn(Long expiresIn) {
+            this.expiresIn = expiresIn;
             return this;
         }
 
         public SignInResponseDto build() {
-            return new SignInResponseDto(id, username, email, token);
+            return new SignInResponseDto(id, username, email, accessToken, refreshToken, expiresIn);
         }
     }
 
@@ -92,12 +108,14 @@ public class SignInResponseDto {
         return Objects.equals(id, that.id)
                 && Objects.equals(username, that.username)
                 && Objects.equals(email, that.email)
-                && Objects.equals(token, that.token);
+                && Objects.equals(accessToken, that.accessToken)
+                && Objects.equals(refreshToken, that.refreshToken)
+                && Objects.equals(expiresIn, that.expiresIn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, email, token);
+        return Objects.hash(id, username, email, accessToken, refreshToken, expiresIn);
     }
 
     @Override
