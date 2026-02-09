@@ -1,8 +1,10 @@
 package az.gaming_cafe.controller;
 
 import az.gaming_cafe.model.dto.common.ApiResult;
+import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
 import az.gaming_cafe.model.dto.request.SignInRequestDto;
 import az.gaming_cafe.model.dto.request.SignUpRequestDto;
+import az.gaming_cafe.model.dto.response.RefreshTokenResponseDto;
 import az.gaming_cafe.model.dto.response.SignInResponseDto;
 import az.gaming_cafe.model.dto.response.SignUpResponseDto;
 import az.gaming_cafe.service.AuthService;
@@ -28,6 +30,17 @@ public class AuthController {
     @PostMapping("/sign-up")
     public ApiResult<SignUpResponseDto> signUp(@RequestBody @Valid SignUpRequestDto request) {
         return ApiResult.ok(authService.signUp(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ApiResult<RefreshTokenResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto request) {
+        return ApiResult.ok(authService.refreshToken(request));
+    }
+
+    @PostMapping("/logout")
+    public ApiResult<Void> logout(@RequestBody RefreshTokenRequestDto request) {
+        authService.logout(request);
+        return ApiResult.ok();
     }
 
 //    @PreAuthorize("@permissionEvaluator.canCancelReservation(authentication, #reservation)")

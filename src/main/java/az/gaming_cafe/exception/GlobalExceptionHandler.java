@@ -21,6 +21,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ErrorResponse handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
+        log.error("ActionLog.InvalidRefreshTokenException: ", ex);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid Refresh Token Exception");
+    }
+
+    @ExceptionHandler(UserInactiveException.class)
+    public ErrorResponse handleInvalidRefreshTokenException(UserInactiveException ex) {
+        log.error("ActionLog.UserInactiveException: ", ex);
+        return buildResponse(HttpStatus.UNAUTHORIZED, "User Inactive Exception");
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ErrorResponse handleInvalidCredentialsException(InvalidCredentialsException ex) {
         log.error("ActionLog.InvalidCredentialsException: ", ex);

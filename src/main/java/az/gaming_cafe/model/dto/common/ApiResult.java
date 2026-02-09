@@ -18,6 +18,12 @@ public class ApiResult<T> {
                 .build();
     }
 
+    public static <T> ApiResult<T> ok() {
+        return ApiResult.<T>builder()
+                .success(true)
+                .build();
+    }
+
     public static <T> ApiResult<T> of(T data) {
         return data != null ? ok(data) : ok(null);
     }
