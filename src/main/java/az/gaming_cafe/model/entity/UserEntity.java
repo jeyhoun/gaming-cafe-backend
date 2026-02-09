@@ -5,14 +5,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = UserEntity.TABLE_NAME)
@@ -33,9 +39,13 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<RoleEntity> roles = new HashSet<>();
 
     private BigDecimal balance;
 
@@ -92,14 +102,13 @@ public class UserEntity {
         this.balance = balance;
     }
 
-    public UserRole getRole() {
-        return role;
+    public Set<RoleEntity> getRoles() {
+        return roles;
     }
 
-    public void setRole(UserRole role) {
-        this.role = role;
+    public void setRoles(Set<RoleEntity> roles) {
+        this.roles = roles;
     }
-
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -120,11 +129,10 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(String email, String username, String password, UserRole role) {
+    public UserEntity(String email, String username, String password) {
         this.email = email;
         this.username = username;
         this.password = password;
-        this.role = role;
     }
 
     @Override
@@ -146,7 +154,6 @@ public class UserEntity {
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
-                ", role='" + role + '\'' +
                 ", balance=" + balance +
                 ", createdAt=" + createdAt +
                 ", isActive=" + isActive +
