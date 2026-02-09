@@ -3,6 +3,7 @@ package az.gaming_cafe.security.rbac;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,8 +18,11 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtils {
 
-    private final String SECRET = "sizin_cox_uzun_ve_tehlukesiz_gizli_acariniz_12345678";
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    private final SecretKey key;
+
+    public JwtUtils(@Value("${jwt.secret-key}") String secretKey) {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateToken(String username, Map<String, Object> extraClaims) {
         return Jwts.builder()
