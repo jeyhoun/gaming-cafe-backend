@@ -1,7 +1,7 @@
-INSERT INTO users (id, email, username, password, role, balance, is_active, created_at)
-VALUES (1, 'alice@example.com', 'alice', 'pass123', 'USER', 50.00, TRUE, NOW()),
-       (2, 'bob@example.com', 'bob', 'pass123', 'USER', 30.00, TRUE, NOW()),
-       (3, 'admin@example.com', 'admin', 'adminpass', 'ADMIN', 0.00, TRUE, NOW());
+INSERT INTO users (id, email, username, password, balance, is_active, created_at)
+VALUES (1, 'alice@example.com', 'alice', 'pass123',  50.00, TRUE, NOW()),
+       (2, 'bob@example.com', 'bob', 'pass123',  30.00, TRUE, NOW()),
+       (3, 'admin@example.com', 'admin', 'adminpass', 0.00, TRUE, NOW());
 
 INSERT INTO computers (name, status, ip_address, specs, created_at)
 VALUES ('PC-01', 'AVAILABLE', '192.168.1.101', '{
@@ -69,3 +69,11 @@ INSERT INTO payments (id, user_id, session_id, amount, payment_type, created_at)
 VALUES (1, 1, 1, 7.50, 'CARD', NOW()),
        (2, 2, NULL, 20.00, 'BALANCE_LOAD', NOW()),
        (3, 1, 3, 7.00, 'CASH', NOW());
+
+INSERT INTO roles (id, name)
+VALUES (1, 'USER'),
+       (2, 'ADMIN'),
+       (3, 'MODERATOR'),
+       (4, 'SUPPORT'),
+       (5, 'DEVOPS'),
+       (6, 'BACKEND');
