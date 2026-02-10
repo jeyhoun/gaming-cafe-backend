@@ -88,7 +88,9 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(user);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), null, null, user);
+        String ipAddress = getClientIp();
+        String userAgent = getUserAgent();
+        saveRefreshTokenJti(refreshTokenData.getJti(), ipAddress, userAgent, user);
 
         log.info("ActionLog.signIn.end");
         return SignInResponseDto.builder()
@@ -123,7 +125,9 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(savedUser);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(savedUser.getUsername());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), null, null, savedUser);
+        String ipAddress = getClientIp();
+        String userAgent = getUserAgent();
+        saveRefreshTokenJti(refreshTokenData.getJti(), ipAddress, userAgent, savedUser);
 
         log.info("ActionLog.signUp.end");
         return SignUpResponseDto.builder()
@@ -151,7 +155,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidRefreshTokenException("Invalid refresh token");
         } //CHECKSTYLE:ON
 
-        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByJti(jti)
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByJtiWithLock(jti)
                 .orElseThrow(() -> {
                     log.warn("ActionLog.refreshToken.jtiNotFound");
                     return new InvalidRefreshTokenException("Invalid refresh token");
@@ -175,17 +179,15 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidRefreshTokenException("Invalid refresh token");
         }
 
-        refreshTokenEntity.setUseCount(refreshTokenEntity.getUseCount() + 1);
-        refreshTokenEntity.setLastUsedAt(LocalDateTime.now());
-
-        if (refreshTokenEntity.getUseCount() > maxRefreshTokenUse) {
-            log.warn("ActionLog.refreshToken.tooManyUses jti: {}, count: {}",
-                    jti, refreshTokenEntity.getUseCount());
+        int currentUseCount = refreshTokenEntity.getUseCount();
+        if (currentUseCount >= maxRefreshTokenUse) {
+            log.warn("ActionLog.refreshToken.tooManyUses jti: {}, count: {}", jti, currentUseCount);
             refreshTokenRepository.revokeAllUserTokens(user.getId());
             throw new InvalidRefreshTokenException("Suspicious activity detected");
         }
 
-        refreshTokenRepository.save(refreshTokenEntity);
+        refreshTokenEntity.setUseCount(currentUseCount + 1);
+        refreshTokenEntity.setLastUsedAt(LocalDateTime.now());
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
         JwtUtils.TokenWithJti newRefreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
@@ -193,7 +195,9 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        saveRefreshTokenJti(newRefreshTokenData.getJti(), null, null, user);
+        String ipAddress = getClientIp();
+        String userAgent = getUserAgent();
+        saveRefreshTokenJti(newRefreshTokenData.getJti(), ipAddress, userAgent, user);
 
         log.info("ActionLog.refreshToken.end");
         return RefreshTokenResponseDto.builder()
@@ -263,5 +267,45 @@ public class AuthServiceImpl implements AuthService {
 
     public boolean isExpired(LocalDateTime expiryDate) {
         return LocalDateTime.now().isAfter(expiryDate);
+    }
+
+    private String getClientIp() {
+        try {
+            jakarta.servlet.http.HttpServletRequest request =
+                    ((org.springframework.web.context.request.ServletRequestAttributes)
+                            org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                            .getRequest();
+
+            String xForwardedFor = request.getHeader("X-Forwarded-For");
+            if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+                return xForwardedFor.split(",")[0].trim();
+            }
+
+            String xRealIp = request.getHeader("X-Real-IP");
+            if (xRealIp != null && !xRealIp.isEmpty()) {
+                return xRealIp;
+            }
+
+            return request.getRemoteAddr();
+            //CHECKSTYLE:OFF
+        } catch (Exception e) {
+            log.warn("ActionLog.getClientIp.failed: {}", e.getMessage());
+            return "unknown";
+        } //CHECKSTYLE:ON
+    }
+
+    private String getUserAgent() {
+        try {
+            jakarta.servlet.http.HttpServletRequest request =
+                    ((org.springframework.web.context.request.ServletRequestAttributes)
+                            org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                            .getRequest();
+            String userAgent = request.getHeader("User-Agent");
+            return userAgent != null ? userAgent : "unknown";
+            //CHECKSTYLE:OFF
+        } catch (Exception e) {
+            log.warn("ActionLog.getUserAgent.failed: {}", e.getMessage());
+            return "unknown";
+        } //CHECKSTYLE:ON
     }
 }
