@@ -1,5 +1,6 @@
 package az.gaming_cafe.service.impl;
 
+import az.gaming_cafe.component.dto.RequestContext;
 import az.gaming_cafe.exception.InvalidCredentialsException;
 import az.gaming_cafe.exception.InvalidRefreshTokenException;
 import az.gaming_cafe.exception.UserAlreadyExistsException;
@@ -65,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public SignInResponseDto signIn(SignInRequestDto request) {
+    public SignInResponseDto signIn(SignInRequestDto request, RequestContext context) {
         log.info("ActionLog.signIn.start");
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
@@ -88,9 +89,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(user);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
 
-        String ipAddress = getClientIp();
-        String userAgent = getUserAgent();
-        saveRefreshTokenJti(refreshTokenData.getJti(), ipAddress, userAgent, user);
+        saveRefreshTokenJti(refreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), user);
 
         log.info("ActionLog.signIn.end");
         return SignInResponseDto.builder()
@@ -105,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public SignUpResponseDto signUp(SignUpRequestDto request) {
+    public SignUpResponseDto signUp(SignUpRequestDto request, RequestContext context) {
         log.info("ActionLog.signUp.start");
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserAlreadyExistsException(request.getEmail());
@@ -125,9 +124,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(savedUser);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(savedUser.getUsername());
 
-        String ipAddress = getClientIp();
-        String userAgent = getUserAgent();
-        saveRefreshTokenJti(refreshTokenData.getJti(), ipAddress, userAgent, savedUser);
+        saveRefreshTokenJti(refreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), savedUser);
 
         log.info("ActionLog.signUp.end");
         return SignUpResponseDto.builder()
@@ -142,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request) {
+    public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request, RequestContext context) {
         log.info("ActionLog.refreshToken.start");
         String refreshToken = request.getRefreshToken();
 
@@ -195,9 +192,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        String ipAddress = getClientIp();
-        String userAgent = getUserAgent();
-        saveRefreshTokenJti(newRefreshTokenData.getJti(), ipAddress, userAgent, user);
+        saveRefreshTokenJti(newRefreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), user);
 
         log.info("ActionLog.refreshToken.end");
         return RefreshTokenResponseDto.builder()
@@ -267,45 +262,5 @@ public class AuthServiceImpl implements AuthService {
 
     public boolean isExpired(LocalDateTime expiryDate) {
         return LocalDateTime.now().isAfter(expiryDate);
-    }
-
-    private String getClientIp() {
-        try {
-            jakarta.servlet.http.HttpServletRequest request =
-                    ((org.springframework.web.context.request.ServletRequestAttributes)
-                            org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
-                            .getRequest();
-
-            String xForwardedFor = request.getHeader("X-Forwarded-For");
-            if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                return xForwardedFor.split(",")[0].trim();
-            }
-
-            String xRealIp = request.getHeader("X-Real-IP");
-            if (xRealIp != null && !xRealIp.isEmpty()) {
-                return xRealIp;
-            }
-
-            return request.getRemoteAddr();
-            //CHECKSTYLE:OFF
-        } catch (Exception e) {
-            log.warn("ActionLog.getClientIp.failed: {}", e.getMessage());
-            return "unknown";
-        } //CHECKSTYLE:ON
-    }
-
-    private String getUserAgent() {
-        try {
-            jakarta.servlet.http.HttpServletRequest request =
-                    ((org.springframework.web.context.request.ServletRequestAttributes)
-                            org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
-                            .getRequest();
-            String userAgent = request.getHeader("User-Agent");
-            return userAgent != null ? userAgent : "unknown";
-            //CHECKSTYLE:OFF
-        } catch (Exception e) {
-            log.warn("ActionLog.getUserAgent.failed: {}", e.getMessage());
-            return "unknown";
-        } //CHECKSTYLE:ON
     }
 }

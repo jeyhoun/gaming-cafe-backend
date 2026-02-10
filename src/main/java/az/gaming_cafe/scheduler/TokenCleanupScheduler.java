@@ -16,7 +16,7 @@ public class TokenCleanupScheduler {
 
     private final RevokedTokenRepository revokedTokenRepository;
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 0 15 * ?")
     @Transactional
     public void cleanupExpiredTokens() {
         log.info("ActionLog.cleanupExpiredTokens.start");
