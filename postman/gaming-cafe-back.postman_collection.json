@@ -79,13 +79,20 @@
       "name": "logout",
       "request": {
         "auth": {
-          "type": "noauth"
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
         },
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"refreshToken\": \"eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6WyJVU0VSIl0sInVzZXJJZCI6MSwic3ViIjoia2ltIiwiaWF0IjoxNzcwNjcxNDA2LCJleHAiOjE3NzA2NzIzMDZ9.2KhaDQS8RzP2z---jX6y2KSe74QA4S1uIhr6xssyA3fSascXKNxJzXTDkYyBuuH2\"\n}",
+          "raw": "",
           "options": {
             "raw": {
               "language": "json"

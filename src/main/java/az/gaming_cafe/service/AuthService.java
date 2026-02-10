@@ -12,5 +12,5 @@ public interface AuthService {
     SignInResponseDto signIn(SignInRequestDto request);
     SignUpResponseDto signUp(SignUpRequestDto request);
     RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request);
-    void logout(RefreshTokenRequestDto request);
+    void logout();
 }

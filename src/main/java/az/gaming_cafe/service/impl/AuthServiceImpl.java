@@ -11,9 +11,11 @@ import az.gaming_cafe.model.dto.response.RefreshTokenResponseDto;
 import az.gaming_cafe.model.dto.response.SignInResponseDto;
 import az.gaming_cafe.model.dto.response.SignUpResponseDto;
 import az.gaming_cafe.model.entity.RefreshTokenEntity;
+import az.gaming_cafe.model.entity.RevokedTokenEntity;
 import az.gaming_cafe.model.entity.RoleEntity;
 import az.gaming_cafe.model.entity.UserEntity;
 import az.gaming_cafe.repository.RefreshTokenRepository;
+import az.gaming_cafe.repository.RevokedTokenRepository;
 import az.gaming_cafe.repository.RoleRepository;
 import az.gaming_cafe.repository.UserRepository;
 import az.gaming_cafe.security.rbac.JwtUtils;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Slf4j
 @Service
@@ -33,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
 
@@ -48,11 +52,13 @@ public class AuthServiceImpl implements AuthService {
     public AuthServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            RefreshTokenRepository refreshTokenRepository,
+                           RevokedTokenRepository revokedTokenRepository,
                            PasswordEncoder passwordEncoder,
                            JwtUtils jwtUtil) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.revokedTokenRepository = revokedTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
     }
@@ -198,22 +204,47 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(RefreshTokenRequestDto request) {
+    @Transactional
+    public void logout() {
         log.info("ActionLog.logout.start");
 
-        try {
-            String jti = jwtUtil.extractJti(request.getRefreshToken());
+        String username = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getName();
 
-            refreshTokenRepository.findByJti(jti).ifPresent(token -> {
-                token.setRevoked(true);
-                refreshTokenRepository.save(token);
-                log.info("ActionLog.logout.success userId: {}", token.getUser().getId());
-            });
-            //CHECKSTYLE:OFF
-        } catch (Exception e) {
-            log.warn("ActionLog.logout.invalidToken");
-        } //CHECKSTYLE:ON
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.warn("ActionLog.logout.userNotFound username: {}", username);
+                    return new InvalidCredentialsException();
+                });
 
+        int revokedCount = refreshTokenRepository.revokeAllUserTokens(user.getId());
+
+        jakarta.servlet.http.HttpServletRequest request =
+                ((org.springframework.web.context.request.ServletRequestAttributes)
+                        org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                        .getRequest();
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String accessToken = authHeader.substring(7);
+                String jti = jwtUtil.extractJti(accessToken);
+                LocalDateTime expiration = jwtUtil.extractExpiration(accessToken)
+                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+                RevokedTokenEntity revokedToken = new RevokedTokenEntity();
+                revokedToken.setJti(jti);
+                revokedToken.setExpiryDate(expiration);
+                revokedTokenRepository.save(revokedToken);
+
+                log.info("ActionLog.logout.accessTokenRevoked jti: {}", jti);
+                //CHECKSTYLE:OFF
+            } catch (Exception e) {
+                log.warn("ActionLog.logout.couldNotRevokeAccessToken error: {}", e.getMessage());
+            } //CHECKSTYLE:ON
+        }
+
+        log.info("ActionLog.logout.success userId: {}, revokedRefreshTokens: {}", user.getId(), revokedCount);
         log.info("ActionLog.logout.end");
     }
 
