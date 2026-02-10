@@ -1,5 +1,6 @@
 package az.gaming_cafe.config;
 
+import az.gaming_cafe.repository.RevokedTokenRepository;
 import az.gaming_cafe.security.rbac.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtil;
+    private final RevokedTokenRepository revokedTokenRepository;
 
-    public JwtAuthFilter(JwtUtils util) {
+    public JwtAuthFilter(JwtUtils util, RevokedTokenRepository revokedTokenRepository) {
         this.jwtUtil = util;
+        this.revokedTokenRepository = revokedTokenRepository;
     }
 
     @Override
@@ -42,7 +45,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.isTokenValid(jwt, username)) {
-
+                String jti = jwtUtil.extractJti(jwt);
+                if (jti != null && revokedTokenRepository.existsByJti(jti)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
                 List<GrantedAuthority> authorities = jwtUtil.extractRoles(jwt).stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))

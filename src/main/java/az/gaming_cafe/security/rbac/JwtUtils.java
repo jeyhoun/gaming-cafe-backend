@@ -69,8 +69,15 @@ public class JwtUtils {
     }
 
     public String generateAccessToken(UserEntity user) {
+        return generateAccessTokenWithJti(user).getRefreshToken();
+    }
+
+    public TokenWithJti generateAccessTokenWithJti(UserEntity user) {
         Map<String, Object> claims = buildClaims(user);
-        return generateToken(user.getUsername(), claims, accessTokenExpiration);
+        String jti = UUID.randomUUID().toString();
+        claims.put(CLAIM_JTI, jti);
+        String token = generateToken(user.getUsername(), claims, accessTokenExpiration);
+        return new TokenWithJti(token, jti);
     }
 
     public String generateToken(String username, Map<String, Object> extraClaims, long expiration) {
@@ -117,6 +124,10 @@ public class JwtUtils {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     private boolean isTokenExpired(String token) {

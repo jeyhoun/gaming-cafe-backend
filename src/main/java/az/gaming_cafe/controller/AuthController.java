@@ -38,8 +38,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ApiResult<Void> logout(@RequestBody RefreshTokenRequestDto request) {
-        authService.logout(request);
+    public ApiResult<Void> logout() {
+        authService.logout();
         return ApiResult.ok();
     }
 
