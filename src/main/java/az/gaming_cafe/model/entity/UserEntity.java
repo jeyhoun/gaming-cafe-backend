@@ -1,10 +1,7 @@
 package az.gaming_cafe.model.entity;
 
-import az.gaming_cafe.model.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -52,6 +49,9 @@ public class UserEntity {
     private Boolean isActive;
 
     private LocalDateTime createdAt;
+
+    public UserEntity() {
+    }
 
     @PrePersist
     public void prePersist() {
@@ -126,19 +126,14 @@ public class UserEntity {
         isActive = active;
     }
 
-    public UserEntity() {
-    }
-
-    public UserEntity(String email, String username, String password) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof UserEntity)) {
+            return false;
+        }
         UserEntity that = (UserEntity) o;
         return id != null && id.equals(that.id);
     }

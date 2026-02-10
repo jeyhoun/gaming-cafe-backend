@@ -1,6 +1,5 @@
 package az.gaming_cafe.security.abac;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component("permissionEvaluator")

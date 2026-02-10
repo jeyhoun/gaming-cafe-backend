@@ -11,6 +11,65 @@ public class SignUpResponseDto {
     private String refreshToken;
     private Long expiresIn;
 
+    public SignUpResponseDto(Long id, String username,
+                             String email, String accessToken,
+                             String refreshToken, Long expiresIn) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @SuppressWarnings("checkstyle:HiddenField")
+    public static class Builder {
+        private Long id;
+        private String username;
+        private String email;
+        private String accessToken;
+        private String refreshToken;
+        private Long expiresIn;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder accessToken(String accessToken) {
+            this.accessToken = accessToken;
+            return this;
+        }
+
+        public Builder refreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
+            return this;
+        }
+
+        public Builder expiresIn(Long expiresIn) {
+            this.expiresIn = expiresIn;
+            return this;
+        }
+
+        public SignUpResponseDto build() {
+            return new SignUpResponseDto(id, username, email, accessToken, refreshToken, expiresIn);
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -59,80 +118,17 @@ public class SignUpResponseDto {
         this.expiresIn = expiresIn;
     }
 
-    public SignUpResponseDto() {
-    }
-
-    public SignUpResponseDto(Long id, String username, String email) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-    }
-
-    public SignUpResponseDto(Long id, String username, String email, String accessToken, String refreshToken, Long expiresIn) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.expiresIn = expiresIn;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-        private Long id;
-        private String username;
-        private String email;
-        private String accessToken;
-        private String refreshToken;
-        private Long expiresIn;
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder username(String username) {
-            this.username = username;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder accessToken(String accessToken) {
-            this.accessToken = accessToken;
-            return this;
-        }
-
-        public Builder refreshToken(String refreshToken) {
-            this.refreshToken = refreshToken;
-            return this;
-        }
-
-        public Builder expiresIn(Long expiresIn) {
-            this.expiresIn = expiresIn;
-            return this;
-        }
-
-        public SignUpResponseDto build() {
-            return new SignUpResponseDto(id, username, email, accessToken, refreshToken, expiresIn);
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof SignUpResponseDto that)) return false;
-        return Objects.equals(id, that.id)
-                && Objects.equals(username, that.username)
-                && Objects.equals(email, that.email)
-                && Objects.equals(accessToken, that.accessToken)
-                && Objects.equals(refreshToken, that.refreshToken)
-                && Objects.equals(expiresIn, that.expiresIn);
+        if (!(o instanceof SignUpResponseDto that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id) &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(refreshToken, that.refreshToken) &&
+                Objects.equals(expiresIn, that.expiresIn);
     }
 
     @Override

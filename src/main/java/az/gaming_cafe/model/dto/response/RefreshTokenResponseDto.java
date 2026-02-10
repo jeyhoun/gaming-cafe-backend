@@ -6,10 +6,14 @@ public class RefreshTokenResponseDto {
     private String refreshToken;
     private Long expiresIn;
 
+    public RefreshTokenResponseDto() {
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
+    @SuppressWarnings("checkstyle:HiddenField")
     public static class Builder {
         private String accessToken;
         private String refreshToken;
@@ -60,15 +64,6 @@ public class RefreshTokenResponseDto {
     }
 
     public void setExpiresIn(Long expiresIn) {
-        this.expiresIn = expiresIn;
-    }
-
-    public RefreshTokenResponseDto() {
-    }
-
-    public RefreshTokenResponseDto(String accessToken, String refreshToken, Long expiresIn) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
         this.expiresIn = expiresIn;
     }
 }

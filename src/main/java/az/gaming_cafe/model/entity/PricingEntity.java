@@ -40,6 +40,9 @@ public class PricingEntity {
 
     private Boolean isActive;
 
+    public PricingEntity() {
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.isActive == null) {
@@ -103,22 +106,14 @@ public class PricingEntity {
         isActive = active;
     }
 
-    public PricingEntity() {
-    }
-
-    public PricingEntity(String name, BigDecimal pricePerHour, LocalTime startTime, LocalTime endTime, Integer[] daysOfWeek, Boolean isActive) {
-        this.name = name;
-        this.pricePerHour = pricePerHour;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.daysOfWeek = daysOfWeek;
-        this.isActive = isActive;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PricingEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PricingEntity)) {
+            return false;
+        }
         PricingEntity that = (PricingEntity) o;
         return id != null && id.equals(that.id);
     }

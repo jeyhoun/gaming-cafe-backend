@@ -41,10 +41,15 @@ public class ComputerEntity {
 
     private LocalDateTime createdAt;
 
+    public ComputerEntity() {
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        if (this.status == null) this.status = ComputerStatus.AVAILABLE;
+        if (this.status == null) {
+            this.status = ComputerStatus.AVAILABLE;
+        }
     }
 
     public Long getId() {
@@ -95,22 +100,14 @@ public class ComputerEntity {
         this.createdAt = createdAt;
     }
 
-    public ComputerEntity() {
-    }
-
-    public ComputerEntity(Long id, String name, ComputerStatus status, String ipAddress, Map<String, String> specs, LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-        this.ipAddress = ipAddress;
-        this.specs = specs;
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ComputerEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ComputerEntity)) {
+            return false;
+        }
         ComputerEntity that = (ComputerEntity) o;
         return id != null && id.equals(that.id);
     }

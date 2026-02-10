@@ -20,6 +20,9 @@ public class PermissionEntity {
     @Column(unique = true, nullable = false)
     private String name;
 
+    public PermissionEntity() {
+    }
+
     public Long getId() {
         return id;
     }
@@ -36,18 +39,14 @@ public class PermissionEntity {
         this.name = name;
     }
 
-    public PermissionEntity() {
-    }
-
-    public PermissionEntity(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PermissionEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PermissionEntity)) {
+            return false;
+        }
         PermissionEntity that = (PermissionEntity) o;
         return id != null && id.equals(that.id);
     }

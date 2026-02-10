@@ -15,6 +15,9 @@ public class SignInRequestDto {
     @NotBlank(message = "Password cannot be blank")
     private String password;
 
+    public SignInRequestDto() {
+    }
+
     public String getEmail() {
         return email;
     }
@@ -31,17 +34,11 @@ public class SignInRequestDto {
         this.password = password;
     }
 
-    public SignInRequestDto() {
-    }
-
-    public SignInRequestDto(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof SignInRequestDto that)) return false;
+        if (!(o instanceof SignInRequestDto that)){
+            return false;
+        }
         return Objects.equals(email, that.email) && Objects.equals(password, that.password);
     }
 
