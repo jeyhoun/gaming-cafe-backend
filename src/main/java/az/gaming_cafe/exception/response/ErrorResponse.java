@@ -27,6 +27,7 @@ public class ErrorResponse {
         return new Builder();
     }
 
+    @SuppressWarnings("checkstyle:HiddenField")
     public static class Builder {
         private int status;
         private String path;

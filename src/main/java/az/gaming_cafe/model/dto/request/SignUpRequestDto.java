@@ -24,6 +24,9 @@ public class SignUpRequestDto {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+    public SignUpRequestDto() {
+    }
+
     public String getUsername() {
         return username;
     }
@@ -48,21 +51,14 @@ public class SignUpRequestDto {
         this.password = password;
     }
 
-    public SignUpRequestDto() {
-    }
-
-    public SignUpRequestDto(String username, String email, String password) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof SignUpRequestDto that)) return false;
-        return Objects.equals(username, that.username)
-                && Objects.equals(email, that.email)
-                && Objects.equals(password, that.password);
+        if (!(o instanceof SignUpRequestDto that)) {
+            return false;
+        }
+        return Objects.equals(username, that.username) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(password, that.password);
     }
 
     @Override

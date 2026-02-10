@@ -36,6 +36,8 @@ public class RoleEntity {
     )
     private Set<PermissionEntity> permissions = new HashSet<>();
 
+    public RoleEntity() {
+    }
 
     public Long getId() {
         return id;
@@ -61,19 +63,14 @@ public class RoleEntity {
         this.permissions = permissions;
     }
 
-    public RoleEntity() {
-    }
-
-    public RoleEntity(Long id, String name, Set<PermissionEntity> permissions) {
-        this.id = id;
-        this.name = name;
-        this.permissions = permissions;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RoleEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RoleEntity)) {
+            return false;
+        }
         RoleEntity that = (RoleEntity) o;
         return id != null && id.equals(that.id);
     }

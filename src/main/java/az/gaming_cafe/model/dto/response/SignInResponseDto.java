@@ -11,6 +11,17 @@ public class SignInResponseDto {
     private String refreshToken;
     private Long expiresIn;
 
+    public SignInResponseDto(Long id, String username,
+                             String email, String accessToken,
+                             String refreshToken, Long expiresIn) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresIn = expiresIn;
+    }
+
     public Long getId() {
         return id;
     }
@@ -43,15 +54,19 @@ public class SignInResponseDto {
         this.accessToken = accessToken;
     }
 
-    public SignInResponseDto() {
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
-    public SignInResponseDto(Long id, String username, String email, String accessToken, String refreshToken, Long expiresIn) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.accessToken = accessToken;
+    public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public Long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(Long expiresIn) {
         this.expiresIn = expiresIn;
     }
 
@@ -59,6 +74,7 @@ public class SignInResponseDto {
         return new Builder();
     }
 
+    @SuppressWarnings("checkstyle:HiddenField")
     public static class Builder {
         private Long id;
         private String username;
@@ -104,13 +120,15 @@ public class SignInResponseDto {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof SignInResponseDto that)) return false;
-        return Objects.equals(id, that.id)
-                && Objects.equals(username, that.username)
-                && Objects.equals(email, that.email)
-                && Objects.equals(accessToken, that.accessToken)
-                && Objects.equals(refreshToken, that.refreshToken)
-                && Objects.equals(expiresIn, that.expiresIn);
+        if (!(o instanceof SignInResponseDto that)){
+            return false;
+        }
+        return Objects.equals(id, that.id) &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(refreshToken, that.refreshToken) &&
+                Objects.equals(expiresIn, that.expiresIn);
     }
 
     @Override

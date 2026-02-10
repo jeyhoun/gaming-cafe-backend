@@ -139,10 +139,11 @@ public class AuthServiceImpl implements AuthService {
         String jti;
         try {
             jti = jwtUtil.extractJti(refreshToken);
+            //CHECKSTYLE:OFF
         } catch (Exception e) {
             log.warn("ActionLog.refreshToken.invalidToken");
             throw new InvalidRefreshTokenException("Invalid refresh token");
-        }
+        } //CHECKSTYLE:ON
 
         RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByJti(jti)
                 .orElseThrow(() -> {
@@ -208,9 +209,10 @@ public class AuthServiceImpl implements AuthService {
                 refreshTokenRepository.save(token);
                 log.info("ActionLog.logout.success userId: {}", token.getUser().getId());
             });
+            //CHECKSTYLE:OFF
         } catch (Exception e) {
             log.warn("ActionLog.logout.invalidToken");
-        }
+        } //CHECKSTYLE:ON
 
         log.info("ActionLog.logout.end");
     }

@@ -52,6 +52,9 @@ public class SessionEntity {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
+    public SessionEntity() {
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
@@ -131,25 +134,14 @@ public class SessionEntity {
         this.createdAt = createdAt;
     }
 
-    public SessionEntity() {
-    }
-
-    public SessionEntity(Long id, UserEntity user, ComputerEntity computer, LocalDateTime startTime, LocalDateTime endTime, Integer totalMinutes, BigDecimal totalCost, SessionStatus status, LocalDateTime createdAt) {
-        this.id = id;
-        this.user = user;
-        this.computer = computer;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.totalMinutes = totalMinutes;
-        this.totalCost = totalCost;
-        this.status = status;
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SessionEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof SessionEntity)) {
+            return false;
+        }
         SessionEntity that = (SessionEntity) o;
         return id != null && id.equals(that.id);
     }

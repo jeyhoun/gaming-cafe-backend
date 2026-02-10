@@ -48,6 +48,9 @@ public class RefreshTokenEntity {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    public RefreshTokenEntity() {
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
@@ -136,28 +139,14 @@ public class RefreshTokenEntity {
         this.createdAt = createdAt;
     }
 
-    public RefreshTokenEntity() {
-    }
-
-    public RefreshTokenEntity(String jti, UserEntity user,
-                              LocalDateTime expiryDate, boolean revoked,
-                              String ipAddress, String userAgent,
-                              LocalDateTime lastUsedAt, Integer useCount, LocalDateTime createdAt) {
-        this.jti = jti;
-        this.user = user;
-        this.expiryDate = expiryDate;
-        this.revoked = revoked;
-        this.ipAddress = ipAddress;
-        this.userAgent = userAgent;
-        this.lastUsedAt = lastUsedAt;
-        this.useCount = useCount;
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RefreshTokenEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RefreshTokenEntity)) {
+            return false;
+        }
         RefreshTokenEntity that = (RefreshTokenEntity) o;
         return id != null && id.equals(that.id);
     }

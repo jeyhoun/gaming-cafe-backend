@@ -11,6 +11,21 @@ public class ApiResult<T> {
     private T data;
     private LocalDateTime timestamp;
 
+    public ApiResult(Builder<T> builder) {
+        this.data = builder.data;
+        this.timestamp = builder.timestamp != null ? builder.timestamp : LocalDateTime.now();
+
+        if (builder.success) {
+            this.code = 200;
+            this.status = "SUCCESS";
+            this.message = builder.message != null ? builder.message : "OK";
+        } else {
+            this.code = 500;
+            this.status = "FAIL";
+            this.message = builder.message != null ? builder.message : "Internal Server Error";
+        }
+    }
+
     public static <T> ApiResult<T> ok(T data) {
         return ApiResult.<T>builder()
                 .success(true)
@@ -43,26 +58,11 @@ public class ApiResult<T> {
                 .build();
     }
 
-    private ApiResult(Builder<T> builder) {
-        this.data = builder.data;
-        this.message = builder.message;
-        this.timestamp = builder.timestamp != null ? builder.timestamp : LocalDateTime.now();
-
-        if (builder.success) {
-            this.code = 200;
-            this.message = "OK";
-            this.status = "SUCCESS";
-        } else {
-            this.code = 500;
-            this.message = "Internal Server Error";
-            this.status = "FAIL";
-        }
-    }
-
     public static <T> Builder<T> builder() {
         return new Builder<>();
     }
 
+    @SuppressWarnings("checkstyle:HiddenField")
     public static class Builder<T> {
         private boolean success;
         private String message;
@@ -136,11 +136,13 @@ public class ApiResult<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ApiResult<?> that)) return false;
-        return code == that.code && Objects.equals(status, that.status)
-                && Objects.equals(message, that.message)
-                && Objects.equals(data, that.data)
-                && Objects.equals(timestamp, that.timestamp);
+        if (!(o instanceof ApiResult<?> that)) {
+            return false;
+        }
+        return code == that.code && Objects.equals(status, that.status) &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(data, that.data) &&
+                Objects.equals(timestamp, that.timestamp);
     }
 
     @Override

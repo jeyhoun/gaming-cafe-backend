@@ -45,6 +45,9 @@ public class PaymentEntity {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    public PaymentEntity() {
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
@@ -98,22 +101,14 @@ public class PaymentEntity {
         this.createdAt = createdAt;
     }
 
-    public PaymentEntity() {
-    }
-
-    public PaymentEntity(Long id, UserEntity user, SessionEntity session, BigDecimal amount, PaymentType paymentType, LocalDateTime createdAt) {
-        this.id = id;
-        this.user = user;
-        this.session = session;
-        this.amount = amount;
-        this.paymentType = paymentType;
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PaymentEntity)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PaymentEntity)) {
+            return false;
+        }
         PaymentEntity that = (PaymentEntity) o;
         return id != null && id.equals(that.id);
     }
