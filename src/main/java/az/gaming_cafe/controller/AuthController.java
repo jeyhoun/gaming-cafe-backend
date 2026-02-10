@@ -1,5 +1,6 @@
 package az.gaming_cafe.controller;
 
+import az.gaming_cafe.component.dto.RequestContext;
 import az.gaming_cafe.model.dto.common.ApiResult;
 import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
 import az.gaming_cafe.model.dto.request.SignInRequestDto;
@@ -23,18 +24,18 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ApiResult<SignInResponseDto> signIn(@RequestBody SignInRequestDto request) {
-        return ApiResult.ok(authService.signIn(request));
+    public ApiResult<SignInResponseDto> signIn(@RequestBody SignInRequestDto request, RequestContext context) {
+        return ApiResult.ok(authService.signIn(request, context));
     }
 
     @PostMapping("/sign-up")
-    public ApiResult<SignUpResponseDto> signUp(@RequestBody @Valid SignUpRequestDto request) {
-        return ApiResult.ok(authService.signUp(request));
+    public ApiResult<SignUpResponseDto> signUp(@RequestBody @Valid SignUpRequestDto request, RequestContext context) {
+        return ApiResult.ok(authService.signUp(request, context));
     }
 
     @PostMapping("/refresh-token")
-    public ApiResult<RefreshTokenResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto request) {
-        return ApiResult.ok(authService.refreshToken(request));
+    public ApiResult<RefreshTokenResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto request, RequestContext context) {
+        return ApiResult.ok(authService.refreshToken(request, context));
     }
 
     @PostMapping("/logout")
@@ -42,10 +43,4 @@ public class AuthController {
         authService.logout();
         return ApiResult.ok();
     }
-
-//    @PreAuthorize("@permissionEvaluator.canCancelReservation(authentication, #reservation)")
-//    @DeleteMapping("/reservations/{id}")
-//    public void cancel(@PathVariable Reservation reservation) {
-//        // reservation cancel logic
-//    }
 }
