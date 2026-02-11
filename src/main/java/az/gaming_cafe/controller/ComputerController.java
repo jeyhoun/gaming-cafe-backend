@@ -4,7 +4,10 @@ import az.gaming_cafe.model.dto.common.ApiResult;
 import az.gaming_cafe.model.dto.response.ComputerResponseDto;
 import az.gaming_cafe.service.ComputerService;
 import az.gaming_cafe.service.impl.ComputerServiceImpl;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
