@@ -1,5 +1,6 @@
 package az.gaming_cafe.service.impl;
 
+import az.gaming_cafe.mapper.ComputerMapper;
 import az.gaming_cafe.model.dto.response.ComputerResponseDto;
 import az.gaming_cafe.model.entity.ComputerEntity;
 import az.gaming_cafe.repository.ComputerRepository;
@@ -12,23 +13,19 @@ import java.util.List;
 public class ComputerService {
 
     private final ComputerRepository computerRepository;
+    private final ComputerMapper computerMapper;
 
-    public ComputerService(ComputerRepository computerRepository) {
+    public ComputerService(ComputerRepository computerRepository,
+                           ComputerMapper computerMapper) {
+
         this.computerRepository = computerRepository;
+        this.computerMapper = computerMapper;
     }
 
     public List<ComputerResponseDto> getAllComputers() {
-        return computerRepository.findAll()
-                .stream()
-                .map(computer -> ComputerResponseDto.builder()
-                        .id(computer.getId())
-                        .name(computer.getName())
-                        .ipAddress(computer.getIpAddress())
-                        .status(computer.getStatus())
-                        .specs(computer.getSpecs())
-                        .createdAt(computer.getCreatedAt())
-                        .build())
-                .toList();
+
+        List<ComputerEntity> computers = computerRepository.findAll();
+        return computerMapper.toDtoList(computers);
     }
 
 

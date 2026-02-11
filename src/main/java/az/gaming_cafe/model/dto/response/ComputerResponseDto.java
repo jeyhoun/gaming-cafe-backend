@@ -1,9 +1,8 @@
 package az.gaming_cafe.model.dto.response;
 
+
 import az.gaming_cafe.model.enums.ComputerStatus;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -11,7 +10,8 @@ import java.util.Map;
 
 @Setter
 @Getter
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ComputerResponseDto {
 
     private Long id;
