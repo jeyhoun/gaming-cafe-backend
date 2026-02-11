@@ -1,4 +1,4 @@
-package az.gaming_cafe.exception.response;
+package az.gaming_cafe.exception.data;
 
 import java.time.LocalDateTime;
 import java.util.Map;

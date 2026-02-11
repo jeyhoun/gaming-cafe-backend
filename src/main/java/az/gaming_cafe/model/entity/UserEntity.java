@@ -45,7 +45,6 @@ public class UserEntity {
     private Set<RoleEntity> roles = new HashSet<>();
 
     private BigDecimal balance;
-
     private Boolean isActive;
 
     private LocalDateTime createdAt;
@@ -150,7 +149,6 @@ public class UserEntity {
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", balance=" + balance +
-                ", createdAt=" + createdAt +
                 ", isActive=" + isActive +
                 '}';
     }

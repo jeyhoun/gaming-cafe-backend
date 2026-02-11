@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = RefreshTokenEntity.TABLE_NAME)
-public class RefreshTokenEntity {
+public class RefreshTokenEntity extends BaseAuditEntity{
 
     public static final String TABLE_NAME = "refresh_tokens";
 
@@ -45,15 +45,11 @@ public class RefreshTokenEntity {
 
     private Integer useCount;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     public RefreshTokenEntity() {
     }
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
         this.revoked = false;
         this.useCount = 0;
     }
@@ -131,14 +127,6 @@ public class RefreshTokenEntity {
         this.useCount = useCount;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -166,7 +154,6 @@ public class RefreshTokenEntity {
                 ", userAgent=" + userAgent +
                 ", lastUsedAt=" + lastUsedAt +
                 ", useCount=" + useCount +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }

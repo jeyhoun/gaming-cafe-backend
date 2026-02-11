@@ -14,10 +14,9 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
-
 @Entity
 @Table(name = RoleEntity.TABLE_NAME)
-public class RoleEntity {
+public class RoleEntity extends BaseAuditEntity {
 
     public static final String TABLE_NAME = "roles";
 

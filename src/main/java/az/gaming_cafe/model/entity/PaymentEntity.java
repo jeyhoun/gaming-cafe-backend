@@ -11,15 +11,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = PaymentEntity.TABLE_NAME)
-public class PaymentEntity {
+public class PaymentEntity extends BaseAuditEntity {
 
     public static final String TABLE_NAME = "payments";
 
@@ -42,15 +40,7 @@ public class PaymentEntity {
     @Column(length = 20, nullable = false)
     private PaymentType paymentType;
 
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
     public PaymentEntity() {
-    }
-
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -93,14 +83,6 @@ public class PaymentEntity {
         this.paymentType = paymentType;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -124,7 +106,6 @@ public class PaymentEntity {
                 "id=" + id +
                 ", amount=" + amount +
                 ", paymentType=" + paymentType +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }
