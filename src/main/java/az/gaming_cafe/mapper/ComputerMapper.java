@@ -11,4 +11,5 @@ import java.util.List;
 public interface ComputerMapper {
 
     List<ComputerResponseDto> toDtoList(List<ComputerEntity> computers);
+    ComputerResponseDto toDto(ComputerEntity computer);
 }
