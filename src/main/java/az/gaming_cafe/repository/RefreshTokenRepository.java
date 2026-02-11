@@ -17,9 +17,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
     @Query("SELECT rt FROM RefreshTokenEntity rt WHERE rt.jti = :jti")
     Optional<RefreshTokenEntity> findByJtiWithLock(String jti);
 
-    Optional<RefreshTokenEntity> findByJti(String jti);
-
     @Modifying
     @Query("UPDATE RefreshTokenEntity rt SET rt.revoked = true WHERE rt.user.id = :userId AND rt.revoked = false")
-    int revokeAllUserTokens(Long userId);
+    void revokeAllUserTokens(Long userId);
 }

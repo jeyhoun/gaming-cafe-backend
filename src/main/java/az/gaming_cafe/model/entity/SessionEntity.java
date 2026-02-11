@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = SessionEntity.TABLE_NAME)
-public class SessionEntity {
+public class SessionEntity extends BaseAuditEntity{
 
     public static final String TABLE_NAME = "sessions";
 
@@ -49,15 +49,11 @@ public class SessionEntity {
     @Column(nullable = false, length = 20)
     private SessionStatus status;
 
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
-
     public SessionEntity() {
     }
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
         this.status = SessionStatus.ACTIVE;
         this.startTime = this.startTime == null ? LocalDateTime.now() : this.startTime;
     }
@@ -126,14 +122,6 @@ public class SessionEntity {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -160,7 +148,6 @@ public class SessionEntity {
                 ", totalMinutes=" + totalMinutes +
                 ", totalCost=" + totalCost +
                 ", status=" + status +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }

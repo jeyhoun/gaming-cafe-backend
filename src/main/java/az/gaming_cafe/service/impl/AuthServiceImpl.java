@@ -1,10 +1,9 @@
 package az.gaming_cafe.service.impl;
 
+import az.gaming_cafe.TrackUserAction;
 import az.gaming_cafe.component.dto.RequestContext;
-import az.gaming_cafe.exception.InvalidCredentialsException;
-import az.gaming_cafe.exception.InvalidRefreshTokenException;
-import az.gaming_cafe.exception.UserAlreadyExistsException;
-import az.gaming_cafe.exception.UserInactiveException;
+import az.gaming_cafe.exception.ApplicationException;
+import az.gaming_cafe.exception.data.ErrorCode;
 import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
 import az.gaming_cafe.model.dto.request.SignInRequestDto;
 import az.gaming_cafe.model.dto.request.SignUpRequestDto;
@@ -66,22 +65,23 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @TrackUserAction
     public SignInResponseDto signIn(SignInRequestDto request, RequestContext context) {
         log.info("ActionLog.signIn.start");
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     log.warn("ActionLog.signIn.userNotFound email: {}", request.getEmail());
-                    return new InvalidCredentialsException();
+                    return new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("ActionLog.signIn.invalidPassword email: {}", request.getEmail());
-            throw new InvalidCredentialsException();
+            throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         if (!user.isActive()) {
-            throw new UserInactiveException("User account is inactive");
+            throw new ApplicationException(ErrorCode.USER_INACTIVE);
         }
 
         refreshTokenRepository.revokeAllUserTokens(user.getId());
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(user);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), user);
+        saveRefreshTokenJti(refreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.signIn.end");
         return SignInResponseDto.builder()
@@ -104,10 +104,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @TrackUserAction
     public SignUpResponseDto signUp(SignUpRequestDto request, RequestContext context) {
         log.info("ActionLog.signUp.start");
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserAlreadyExistsException(request.getEmail());
+            throw new ApplicationException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
         UserEntity newUser = new UserEntity();
@@ -116,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
         RoleEntity userRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("User Role not found"));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.USER_ROLE_NOT_FOUND));
         newUser.getRoles().add(userRole);
 
         UserEntity savedUser = userRepository.save(newUser);
@@ -124,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(savedUser);
         JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(savedUser.getUsername());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), savedUser);
+        saveRefreshTokenJti(refreshTokenData.getJti(), context, savedUser);
 
         log.info("ActionLog.signUp.end");
         return SignUpResponseDto.builder()
@@ -139,6 +140,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @TrackUserAction
     public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request, RequestContext context) {
         log.info("ActionLog.refreshToken.start");
         String refreshToken = request.getRefreshToken();
@@ -149,38 +151,35 @@ public class AuthServiceImpl implements AuthService {
             //CHECKSTYLE:OFF
         } catch (Exception e) {
             log.warn("ActionLog.refreshToken.invalidToken");
-            throw new InvalidRefreshTokenException("Invalid refresh token");
+            throw new ApplicationException(ErrorCode.INVALID_REFRESH_TOKEN);
         } //CHECKSTYLE:ON
 
         RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByJtiWithLock(jti)
                 .orElseThrow(() -> {
                     log.warn("ActionLog.refreshToken.jtiNotFound");
-                    return new InvalidRefreshTokenException("Invalid refresh token");
+                    return new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
                 });
 
         if (refreshTokenEntity.isRevoked()) {
             log.warn("ActionLog.refreshToken.revoked - REPLAY ATTACK DETECTED! jti: {}", jti);
             refreshTokenRepository.revokeAllUserTokens(refreshTokenEntity.getUser().getId());
-            throw new InvalidRefreshTokenException("Token reuse detected - all sessions terminated");
+            throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         if (isExpired(refreshTokenEntity.getExpiryDate())) {
-            log.warn("ActionLog.refreshToken.expired jti: {}", jti);
             refreshTokenRepository.delete(refreshTokenEntity);
-            throw new InvalidRefreshTokenException("Refresh token has expired");
+            throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         UserEntity user = refreshTokenEntity.getUser();
         if (!jwtUtil.isTokenValid(refreshToken, user.getUsername())) {
-            log.warn("ActionLog.refreshToken.invalidJwtSignature");
-            throw new InvalidRefreshTokenException("Invalid refresh token");
+            throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         int currentUseCount = refreshTokenEntity.getUseCount();
         if (currentUseCount >= maxRefreshTokenUse) {
-            log.warn("ActionLog.refreshToken.tooManyUses jti: {}, count: {}", jti, currentUseCount);
             refreshTokenRepository.revokeAllUserTokens(user.getId());
-            throw new InvalidRefreshTokenException("Suspicious activity detected");
+            throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         refreshTokenEntity.setUseCount(currentUseCount + 1);
@@ -192,7 +191,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        saveRefreshTokenJti(newRefreshTokenData.getJti(), context.getIpAddress(), context.getUserAgent(), user);
+        saveRefreshTokenJti(newRefreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.refreshToken.end");
         return RefreshTokenResponseDto.builder()
@@ -213,10 +212,10 @@ public class AuthServiceImpl implements AuthService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     log.warn("ActionLog.logout.userNotFound username: {}", username);
-                    return new InvalidCredentialsException();
+                    return new ApplicationException(ErrorCode.USER_NOT_FOUND);
                 });
 
-        int revokedCount = refreshTokenRepository.revokeAllUserTokens(user.getId());
+        refreshTokenRepository.revokeAllUserTokens(user.getId());
 
         jakarta.servlet.http.HttpServletRequest request =
                 ((org.springframework.web.context.request.ServletRequestAttributes)
@@ -243,19 +242,18 @@ public class AuthServiceImpl implements AuthService {
             } //CHECKSTYLE:ON
         }
 
-        log.info("ActionLog.logout.success userId: {}, revokedRefreshTokens: {}", user.getId(), revokedCount);
         log.info("ActionLog.logout.end");
     }
 
-    private void saveRefreshTokenJti(String jti, String ipAddress, String userAgent, UserEntity user) {
+    private void saveRefreshTokenJti(String jti, RequestContext ctx, UserEntity user) {
         RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
         refreshTokenEntity.setJti(jti);
         refreshTokenEntity.setUser(user);
         refreshTokenEntity.setExpiryDate(
                 LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000)
         );
-        refreshTokenEntity.setIpAddress(ipAddress);
-        refreshTokenEntity.setUserAgent(userAgent);
+        refreshTokenEntity.setIpAddress(ctx.getIpAddress());
+        refreshTokenEntity.setUserAgent(ctx.getUserAgent());
         refreshTokenRepository.save(refreshTokenEntity);
         log.info("ActionLog.saveRefreshTokenJti.end");
     }

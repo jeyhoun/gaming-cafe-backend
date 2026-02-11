@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = PermissionEntity.TABLE_NAME)
-public class PermissionEntity {
+public class PermissionEntity extends BaseAuditEntity {
 
     public static final String TABLE_NAME = "permissions";
 

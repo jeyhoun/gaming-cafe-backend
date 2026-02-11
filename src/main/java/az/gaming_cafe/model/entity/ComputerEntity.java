@@ -13,12 +13,11 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
 @Table(name = ComputerEntity.TABLE_NAME)
-public class ComputerEntity {
+public class ComputerEntity extends BaseAuditEntity {
 
     public static final String TABLE_NAME = "computers";
 
@@ -39,14 +38,11 @@ public class ComputerEntity {
     @Column(columnDefinition = "jsonb")
     private Map<String, String> specs;
 
-    private LocalDateTime createdAt;
-
     public ComputerEntity() {
     }
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
         if (this.status == null) {
             this.status = ComputerStatus.AVAILABLE;
         }
@@ -92,14 +88,6 @@ public class ComputerEntity {
         this.specs = specs;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -125,7 +113,6 @@ public class ComputerEntity {
                 ", status=" + status +
                 ", ipAddress='" + ipAddress + '\'' +
                 ", specs=" + specs +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }
