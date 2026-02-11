@@ -22,7 +22,10 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Authorization failed"),
 
     // GENERIC
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
+
+    //COMPUTER
+    COMPUTER_NOT_FOUND(HttpStatus.NOT_FOUND,"Computer not found");
 
     private final HttpStatus status;
     private final String defaultMessage;

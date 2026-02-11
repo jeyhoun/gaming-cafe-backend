@@ -7,4 +7,5 @@ import java.util.List;
 public interface ComputerService {
 
     List<ComputerResponseDto> getAllComputers();
+    ComputerResponseDto getComputerById(Long id);
 }

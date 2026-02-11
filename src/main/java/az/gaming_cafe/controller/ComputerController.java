@@ -5,6 +5,7 @@ import az.gaming_cafe.model.dto.response.ComputerResponseDto;
 import az.gaming_cafe.service.ComputerService;
 import az.gaming_cafe.service.impl.ComputerServiceImpl;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +24,10 @@ public class ComputerController {
     @GetMapping
     public ApiResult<List<ComputerResponseDto>> getAllComputers() {
         return ApiResult.ok(computerService.getAllComputers());
+    }
+
+    @GetMapping(path = "/{id}")
+    public ApiResult<ComputerResponseDto> getComputerById(@PathVariable Long id) {
+        return ApiResult.ok(computerService.getComputerById(id));
     }
 }
