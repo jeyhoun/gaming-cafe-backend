@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 @Entity
 @Table(name = PricingEntity.TABLE_NAME)
-public class PricingEntity {
+public class PricingEntity extends BaseAuditEntity{
 
     public static final String TABLE_NAME = "prices";
 

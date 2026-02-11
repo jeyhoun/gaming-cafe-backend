@@ -1,6 +1,7 @@
 package az.gaming_cafe.repository;
 
 import az.gaming_cafe.model.entity.UserEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +14,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<UserEntity> findByUsername(String username);
 }

@@ -13,6 +13,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 public class RequestContextResolver implements HandlerMethodArgumentResolver {
 
+    private static final String UNKNOWN = "unknown";
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(RequestContext.class);
@@ -27,8 +29,8 @@ public class RequestContextResolver implements HandlerMethodArgumentResolver {
 
         if (request == null) {
             return RequestContext.builder()
-                    .ipAddress("unknown")
-                    .userAgent("unknown")
+                    .ipAddress(UNKNOWN)
+                    .userAgent(UNKNOWN)
                     .build();
         }
 
@@ -54,6 +56,6 @@ public class RequestContextResolver implements HandlerMethodArgumentResolver {
 
     private String extractUserAgent(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
-        return userAgent != null ? userAgent : "unknown";
+        return userAgent != null ? userAgent : UNKNOWN;
     }
 }

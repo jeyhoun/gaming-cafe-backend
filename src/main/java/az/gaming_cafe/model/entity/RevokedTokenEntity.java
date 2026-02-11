@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = RevokedTokenEntity.TABLE_NAME)
-public class RevokedTokenEntity {
+public class RevokedTokenEntity extends BaseAuditEntity{
 
     public static final String TABLE_NAME = "revoked_tokens";
 
