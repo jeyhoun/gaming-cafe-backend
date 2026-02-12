@@ -52,5 +52,15 @@ public class ComputerServiceImpl implements ComputerService {
         return computerMapper.toDto(savedComputer);
     }
 
+    @Override
+    public ComputerResponseDto updateComputer(Long id,ComputerRequestDto computerRequestDto) {
+        log.info("ActionLog.updateComputer.start");
+        ComputerEntity computer = computerRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.COMPUTER_NOT_FOUND));
+        computerMapper.updateComputerFromDto(computerRequestDto, computer);
+        log.info("ActionLog.updateComputer.end");
+        return computerMapper.toDto(computerRepository.save(computer));
+    }
+
 
 }

@@ -10,4 +10,5 @@ public interface ComputerService {
     List<ComputerResponseDto> getAllComputers();
     ComputerResponseDto getComputerById(Long id);
     ComputerResponseDto createComputer(ComputerRequestDto computerRequestDto);
+    ComputerResponseDto updateComputer(Long id,ComputerRequestDto computerRequestDto);
 }
