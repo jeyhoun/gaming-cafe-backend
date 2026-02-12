@@ -2,7 +2,6 @@ package az.gaming_cafe.model.dto.request;
 
 import az.gaming_cafe.model.enums.ComputerStatus;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 

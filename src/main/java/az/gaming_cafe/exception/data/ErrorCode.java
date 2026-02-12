@@ -8,6 +8,9 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid credentials"),
     USER_INACTIVE(HttpStatus.UNAUTHORIZED, "User account is inactive"),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid refresh token"),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
+    TOKEN_ALREADY_USED(HttpStatus.UNAUTHORIZED, "Token already used"),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Token expired"),
     TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "Token reuse detected"),
 
     // USER

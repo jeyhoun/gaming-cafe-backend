@@ -39,4 +39,9 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to send email from {}", request.getReplyTo(), e);
         }
     }
+
+    @Override
+    public void sendPasswordResetEmail(String email, String resetLink) {
+        //todo
+    }
 }
