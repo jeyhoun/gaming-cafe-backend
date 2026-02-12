@@ -1,11 +1,15 @@
 package az.gaming_cafe.controller;
 
 import az.gaming_cafe.model.dto.common.ApiResult;
+import az.gaming_cafe.model.dto.request.ComputerRequestDto;
 import az.gaming_cafe.model.dto.response.ComputerResponseDto;
 import az.gaming_cafe.service.ComputerService;
 import az.gaming_cafe.service.impl.ComputerServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,5 +33,10 @@ public class ComputerController {
     @GetMapping(path = "/{id}")
     public ApiResult<ComputerResponseDto> getComputerById(@PathVariable Long id) {
         return ApiResult.ok(computerService.getComputerById(id));
+    }
+
+    @PostMapping
+    public ApiResult<ComputerResponseDto> createComputer(@Valid @RequestBody ComputerRequestDto computerRequestDto) {
+        return ApiResult.ok(computerService.createComputer(computerRequestDto));
     }
 }
