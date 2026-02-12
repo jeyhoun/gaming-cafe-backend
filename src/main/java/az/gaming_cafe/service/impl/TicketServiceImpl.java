@@ -5,7 +5,6 @@ import az.gaming_cafe.exception.data.ErrorCode;
 import az.gaming_cafe.model.dto.request.CreateTicketRequestDto;
 import az.gaming_cafe.model.entity.TicketEntity;
 import az.gaming_cafe.model.entity.UserEntity;
-import az.gaming_cafe.model.enums.TicketCategory;
 import az.gaming_cafe.model.enums.TicketPriority;
 import az.gaming_cafe.repository.TicketRepository;
 import az.gaming_cafe.repository.UserRepository;
@@ -42,7 +41,7 @@ public class TicketServiceImpl implements TicketService {
         ticket.setSubject(request.getSubject());
         ticket.setMessage(request.getMessage());
         ticket.setCategory(request.getCategory());
-        ticket.setPriority(calculatePriority(request.getCategory()));
+        ticket.setPriority(calculatePriority(request.getCategory().name()));
         ticketRepository.save(ticket);
 
         try {
@@ -60,12 +59,13 @@ public class TicketServiceImpl implements TicketService {
         }//CHECKSTYLE:ON
     }
 
-    private TicketPriority calculatePriority(TicketCategory category) {
+    private TicketPriority calculatePriority(String category) {
         return switch (category) {
-            case TECHNICAL, HARDWARE -> TicketPriority.CRITICAL;
-            case BILLING -> TicketPriority.HIGH;
-            case GENERAL -> TicketPriority.MEDIUM;
-            case OTHER -> TicketPriority.LOW;
+            case "TECHNICAL", "HARDWARE" -> TicketPriority.CRITICAL;
+            case "BILLING" -> TicketPriority.HIGH;
+            case "GENERAL" -> TicketPriority.MEDIUM;
+            case "OTHER" -> TicketPriority.LOW;
+            default -> throw new IllegalStateException("Unexpected value: " + category);
         };
     }
 }

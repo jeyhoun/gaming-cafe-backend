@@ -12,12 +12,15 @@ public class ComputerRequestDto {
     @NotBlank(message = "Computer name cannot be empty")
     @Size(max = 50, message = "Computer name cannot exceed 50 characters")
     private String name;
+
     private ComputerStatus status;
+
     @Pattern(
             regexp = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$",
             message = "Invalid IPv4 address format"
     )
     private String ipAddress;
+
     @Size(min = 1, max = 10, message = "Specs map must contain between {min} and {max} entries")
     private Map<String,String> specs;
 

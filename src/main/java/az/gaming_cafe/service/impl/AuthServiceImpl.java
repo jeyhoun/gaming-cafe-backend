@@ -294,7 +294,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenVerifyResponseDto verifyReset(String token) {
         log.info("ActionLog.verifyReset.start");
-        Optional<PasswordResetTokenEntity> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+        Optional<PasswordResetTokenEntity> resetTokenOpt =
+                passwordResetTokenRepository.findByTokenWithUser(token);
 
         if (resetTokenOpt.isEmpty()) {
             return TokenVerifyResponseDto.builder().isValid(false).build();
@@ -311,7 +312,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
         log.info("ActionLog.resetPassword.start");
-        PasswordResetTokenEntity resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+        PasswordResetTokenEntity resetToken = passwordResetTokenRepository.findByTokenWithUser(request.getToken())
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_TOKEN));
 
         if (resetToken.isUsed()) {
