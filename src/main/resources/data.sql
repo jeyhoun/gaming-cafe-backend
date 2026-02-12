@@ -70,10 +70,5 @@ VALUES (1, 1, 1, 7.50, 'CARD', NOW()),
        (2, 2, NULL, 20.00, 'BALANCE_LOAD', NOW()),
        (3, 1, 3, 7.00, 'CASH', NOW());
 
-INSERT INTO roles (id, name)
-VALUES (1, 'USER'),
-       (2, 'ADMIN'),
-       (3, 'MODERATOR'),
-       (4, 'SUPPORT'),
-       (5, 'DEVOPS'),
-       (6, 'BACKEND');
+INSERT INTO roles (name, created_at, updated_at)
+VALUES ('USER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
