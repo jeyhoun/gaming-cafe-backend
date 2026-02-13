@@ -1,13 +1,23 @@
 package az.gaming_cafe.model.dto.request;
 
 import az.gaming_cafe.model.enums.TicketCategory;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
 
 public class CreateTicketRequestDto {
 
+    @NotNull(message = "Subject is required")
+    @NotBlank(message = "Subject is required")
     private String subject;
+
+    @NotNull(message = "Message is required")
+    @NotBlank(message = "Message is required")
     private String message;
+
+    @NotNull(message = "Category is required")
+    @NotBlank(message = "Category is required")
     private TicketCategory category;
 
     public CreateTicketRequestDto() {
