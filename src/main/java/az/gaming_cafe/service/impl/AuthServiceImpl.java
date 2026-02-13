@@ -2,6 +2,7 @@ package az.gaming_cafe.service.impl;
 
 import az.gaming_cafe.TrackUserAction;
 import az.gaming_cafe.component.dto.RequestContext;
+import az.gaming_cafe.config.AppProperties;
 import az.gaming_cafe.config.JwtProperties;
 import az.gaming_cafe.config.SecurityProperties;
 import az.gaming_cafe.exception.ApplicationException;
@@ -29,6 +30,7 @@ import az.gaming_cafe.security.rbac.JwtUtils;
 import az.gaming_cafe.service.AuthService;
 import az.gaming_cafe.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,11 +52,10 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtil;
     private final JwtProperties jwtProperties;
     private final SecurityProperties securityProperties;
+    private final AppProperties appProperties;
     private final EmailService emailService;
 
 
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
 
     public AuthServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -64,7 +65,8 @@ public class AuthServiceImpl implements AuthService {
                            PasswordEncoder passwordEncoder,
                            JwtUtils jwtUtil,
                            JwtProperties jwtProperties,
-                           SecurityProperties securityProperties) {
+                           SecurityProperties securityProperties,
+                           AppProperties appProperties,
                            EmailService emailService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -75,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
         this.jwtUtil = jwtUtil;
         this.jwtProperties = jwtProperties;
         this.securityProperties = securityProperties;
+        this.appProperties = appProperties;
         this.emailService = emailService;
     }
 
@@ -284,7 +287,7 @@ public class AuthServiceImpl implements AuthService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        String resetLink = frontendUrl + "/reset-password?token=" + token;
+        String resetLink = appProperties.getFrontendUrl() + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
         log.info("ActionLog.forgotPassword.end");
     }
