@@ -2,6 +2,8 @@ package az.gaming_cafe.service.impl;
 
 import az.gaming_cafe.TrackUserAction;
 import az.gaming_cafe.component.dto.RequestContext;
+import az.gaming_cafe.config.JwtProperties;
+import az.gaming_cafe.config.SecurityProperties;
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
 import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
@@ -39,28 +41,26 @@ public class AuthServiceImpl implements AuthService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
+    private final JwtProperties jwtProperties;
+    private final SecurityProperties securityProperties;
 
-    @Value("${jwt.access-token.expiration:900000}")
-    private long accessTokenExpiration;
-
-    @Value("${jwt.refresh-token.expiration:604800000}")
-    private long refreshTokenExpiration;
-
-    @Value("${security.max-refresh-token-use:1}")
-    private int maxRefreshTokenUse;
 
     public AuthServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            RefreshTokenRepository refreshTokenRepository,
                            RevokedTokenRepository revokedTokenRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtUtils jwtUtil) {
+                           JwtUtils jwtUtil,
+                           JwtProperties jwtProperties,
+                           SecurityProperties securityProperties) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.revokedTokenRepository = revokedTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.jwtProperties = jwtProperties;
+        this.securityProperties = securityProperties;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .accessToken(token)
                 .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
+                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
                 .build();
     }
 
@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(savedUser.getEmail())
                 .accessToken(token)
                 .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
+                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
                 .build();
     }
 
@@ -177,7 +177,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         int currentUseCount = refreshTokenEntity.getUseCount();
-        if (currentUseCount >= maxRefreshTokenUse) {
+        if (currentUseCount >= securityProperties.getMaxRefreshTokenUse()) {
             refreshTokenRepository.revokeAllUserTokens(user.getId());
             throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
@@ -197,7 +197,7 @@ public class AuthServiceImpl implements AuthService {
         return RefreshTokenResponseDto.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
+                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
                 .build();
     }
 
@@ -250,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setJti(jti);
         refreshTokenEntity.setUser(user);
         refreshTokenEntity.setExpiryDate(
-                LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000)
+                LocalDateTime.now().plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000)
         );
         refreshTokenEntity.setIpAddress(ctx.getIpAddress());
         refreshTokenEntity.setUserAgent(ctx.getUserAgent());
