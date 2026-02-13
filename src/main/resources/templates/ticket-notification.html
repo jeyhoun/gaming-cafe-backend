@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a0e27; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #1a1f3a; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 24px; }
+        .ticket-id { background: rgba(255,255,255,0.2); display: inline-block; padding: 8px 16px; border-radius: 20px; color: #fff; font-size: 14px; margin-top: 10px; }
+        .content { padding: 30px; color: #e0e0e0; }
+        .info-row { display: flex; padding: 12px 0; border-bottom: 1px solid #2a2f4a; }
+        .info-label { width: 120px; color: #888; font-weight: 500; }
+        .info-value { flex: 1; color: #e0e0e0; }
+        .priority { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .priority-critical { background: #e74c3c; color: #fff; }
+        .priority-high { background: #e67e22; color: #fff; }
+        .priority-medium { background: #f39c12; color: #fff; }
+        .priority-low { background: #95a5a6; color: #fff; }
+        .message-box { background: #252a45; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 6px; color: #e0e0e0; line-height: 1.6; }
+        .footer { padding: 20px 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #2a2f4a; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎮 New Support Ticket</h1>
+        <div class="ticket-id">Ticket #<span th:text="${ticketId}"></span></div>
+    </div>
+    <div class="content">
+        <div class="info-row">
+            <div class="info-label">User:</div>
+            <div class="info-value" th:text="${userEmail}"></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Category:</div>
+            <div class="info-value" th:text="${category}"></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Priority:</div>
+            <div class="info-value">
+                <span th:class="'priority priority-' + ${priority.toLowerCase()}" th:text="${priority}"></span>
+            </div>
+        </div>
+        <div style="margin-top: 25px;">
+            <div style="color: #888; font-size: 13px; margin-bottom: 10px;">Message:</div>
+            <div class="message-box" th:text="${message}"></div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Gaming Cafe Support System © 2026</p>
+    </div>
+</div>
+</body>
+</html>

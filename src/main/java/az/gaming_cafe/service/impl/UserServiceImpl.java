@@ -9,12 +9,14 @@ import az.gaming_cafe.model.entity.UserEntity;
 import az.gaming_cafe.repository.UserHistoryRepository;
 import az.gaming_cafe.repository.UserRepository;
 import az.gaming_cafe.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto getCurrentUser() {
+        log.info("ActionLog.getCurrentUser.start");
         String username = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
@@ -41,6 +44,7 @@ public class UserServiceImpl implements UserService {
                 .map(BaseAuditEntity::getCreatedAt)
                 .orElse(null);
 
+        log.info("ActionLog.getCurrentUser.end");
         return UserResponseDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
