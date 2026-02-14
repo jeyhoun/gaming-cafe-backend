@@ -4,6 +4,7 @@ import az.gaming_cafe.TrackUserAction;
 import az.gaming_cafe.component.dto.RequestContext;
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
+import az.gaming_cafe.mapper.AuthMapper;
 import az.gaming_cafe.model.dto.request.ForgotPasswordRequestDto;
 import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
 import az.gaming_cafe.model.dto.request.ResetPasswordRequestDto;
@@ -27,6 +28,7 @@ import az.gaming_cafe.security.rbac.JwtUtils;
 import az.gaming_cafe.service.AuthService;
 import az.gaming_cafe.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
     private final EmailService emailService;
+    private final AuthMapper authMapper = Mappers.getMapper(AuthMapper.class);
 
     @Value("${jwt.access-token.expiration:900000}")
     private long accessTokenExpiration;
@@ -109,14 +112,11 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(refreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.signIn.end");
-        return SignInResponseDto.builder()//fixme move to mapper
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .accessToken(token)
-                .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
-                .build();
+
+        return authMapper.toSignInResponse(user,
+                token,
+                refreshTokenData.getRefreshToken(),
+                accessTokenExpiration / 1000);
     }
 
     @Override
@@ -145,14 +145,11 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(refreshTokenData.getJti(), context, savedUser);
 
         log.info("ActionLog.signUp.end");
-        return SignUpResponseDto.builder()//fixme move to mapper
-                .id(savedUser.getId())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .accessToken(token)
-                .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
-                .build();
+
+        return authMapper.toSignUpResponse(savedUser,
+                token,
+                refreshTokenData.getRefreshToken(),
+                accessTokenExpiration / 1000);
     }
 
     @Override
@@ -211,11 +208,10 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(newRefreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.refreshToken.end");
-        return RefreshTokenResponseDto.builder()//fixme move to mapper
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshTokenData.getRefreshToken())
-                .expiresIn(accessTokenExpiration / 1000)
-                .build();
+
+        return authMapper.toRefreshTokenResponse(newAccessToken,
+                newRefreshTokenData.getRefreshToken(),
+                accessTokenExpiration / 1000);
     }
 
     @Override
@@ -305,7 +301,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("ActionLog.verifyReset.end");
         boolean isOk = !resetToken.isUsed() && resetToken.getExpiryDate().isAfter(LocalDateTime.now());
 
-        return TokenVerifyResponseDto.builder().isValid(isOk).build();//fixme move to mapper
+        return authMapper.toTokenVerifyResponse(isOk);
     }
 
     @Override
