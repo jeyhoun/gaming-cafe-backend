@@ -33,5 +33,5 @@ public interface AuthMapper {
                                                     String refreshToken,
                                                     Long expiresIn);
     @Mapping(target = "isValid",source = "isValid")
-    TokenVerifyResponseDto toTokenVerifyResponse(boolean isValid);
+    TokenVerifyResponseDto toTokenVerifyResponse(Boolean isValid);
 }
