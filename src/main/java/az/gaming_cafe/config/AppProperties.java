@@ -8,7 +8,7 @@ public final class AppProperties {
 
     private final String frontendUrl;
 
-    public AppProperties(@Name(value = "frontend.url")String frontendUrl) {
+    public AppProperties(String frontendUrl) {
         this.frontendUrl = frontendUrl;
     }
 

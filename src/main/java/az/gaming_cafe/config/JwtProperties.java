@@ -11,8 +11,8 @@ public final class JwtProperties {
     private final long accessTokenExpiration;
 
     public JwtProperties(String secretKey,
-                         @Name("refresh-token.expiration") long refreshTokenExpiration,
-                         @Name("access-token.expiration") long accessTokenExpiration) {
+                         long refreshTokenExpiration,
+                         long accessTokenExpiration) {
         this.secretKey = secretKey;
         this.refreshTokenExpiration = refreshTokenExpiration;
         this.accessTokenExpiration = accessTokenExpiration;
