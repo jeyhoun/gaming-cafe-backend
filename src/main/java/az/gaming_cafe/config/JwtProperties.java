@@ -2,39 +2,31 @@ package az.gaming_cafe.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Name;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "jwt")
-public class JwtProperties {
+public final class JwtProperties {
 
-    private String secretKey;
-    @Name("refresh-token.expiration")
-    private long refreshTokenExpiration;
-    @Name("access-token.expiration")
-    private long accessTokenExpiration;
+    private final String secretKey;
+    private final long refreshTokenExpiration;
+    private final long accessTokenExpiration;
+
+    public JwtProperties(String secretKey,
+                         @Name("refresh-token.expiration") long refreshTokenExpiration,
+                         @Name("access-token.expiration") long accessTokenExpiration) {
+        this.secretKey = secretKey;
+        this.refreshTokenExpiration = refreshTokenExpiration;
+        this.accessTokenExpiration = accessTokenExpiration;
+    }
 
     public String getSecretKey() {
         return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
     }
 
     public long getRefreshTokenExpiration() {
         return refreshTokenExpiration;
     }
 
-    public void setRefreshTokenExpiration(long refreshTokenExpiration) {
-        this.refreshTokenExpiration = refreshTokenExpiration;
-    }
-
     public long getAccessTokenExpiration() {
         return accessTokenExpiration;
-    }
-
-    public void setAccessTokenExpiration(long accessTokenExpiration) {
-        this.accessTokenExpiration = accessTokenExpiration;
     }
 }
