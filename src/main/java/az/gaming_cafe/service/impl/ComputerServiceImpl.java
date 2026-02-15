@@ -9,7 +9,6 @@ import az.gaming_cafe.model.entity.ComputerEntity;
 import az.gaming_cafe.repository.ComputerRepository;
 import az.gaming_cafe.service.ComputerService;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class ComputerServiceImpl implements ComputerService {
-
-    private final ComputerMapper computerMapper = Mappers.getMapper(ComputerMapper.class);
 
     private final ComputerRepository computerRepository;
 
@@ -31,7 +28,7 @@ public class ComputerServiceImpl implements ComputerService {
         log.info("ActionLog.getAllComputers.start");
         List<ComputerEntity> computers = computerRepository.findAll();
         log.info("ActionLog.getAllComputers.end");
-        return computerMapper.toDtoList(computers);
+        return ComputerMapper.INSTANCE.toDtoList(computers);
     }
 
     @Override
@@ -40,26 +37,26 @@ public class ComputerServiceImpl implements ComputerService {
         ComputerEntity computer = computerRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPUTER_NOT_FOUND));
         log.info("ActionLog.getComputerById.end");
-        return computerMapper.toDto(computer);
+        return ComputerMapper.INSTANCE.toDto(computer);
     }
 
     @Override
     public ComputerResponseDto createComputer(ComputerRequestDto computerRequestDto) {
         log.info("ActionLog.createComputer.start");
-        ComputerEntity computer = computerMapper.toEntity(computerRequestDto);
+        ComputerEntity computer = ComputerMapper.INSTANCE.toEntity(computerRequestDto);
         ComputerEntity savedComputer = computerRepository.save(computer);
         log.info("ActionLog.createComputer.end");
-        return computerMapper.toDto(savedComputer);
+        return ComputerMapper.INSTANCE.toDto(savedComputer);
     }
 
     @Override
-    public ComputerResponseDto updateComputer(Long id,ComputerRequestDto computerRequestDto) {
+    public ComputerResponseDto updateComputer(Long id, ComputerRequestDto computerRequestDto) {
         log.info("ActionLog.updateComputer.start");
         ComputerEntity computer = computerRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPUTER_NOT_FOUND));
-        computerMapper.updateComputerFromDto(computerRequestDto, computer);
+        ComputerMapper.INSTANCE.updateComputerFromDto(computerRequestDto, computer);
         log.info("ActionLog.updateComputer.end");
-        return computerMapper.toDto(computerRepository.save(computer));
+        return ComputerMapper.INSTANCE.toDto(computerRepository.save(computer));
     }
 
 

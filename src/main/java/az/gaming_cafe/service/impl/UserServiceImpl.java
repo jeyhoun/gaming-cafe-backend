@@ -2,9 +2,9 @@ package az.gaming_cafe.service.impl;
 
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
+import az.gaming_cafe.mapper.UserMapper;
 import az.gaming_cafe.model.dto.response.UserResponseDto;
 import az.gaming_cafe.model.entity.BaseAuditEntity;
-import az.gaming_cafe.model.entity.RoleEntity;
 import az.gaming_cafe.model.entity.UserEntity;
 import az.gaming_cafe.repository.UserHistoryRepository;
 import az.gaming_cafe.repository.UserRepository;
@@ -45,13 +45,6 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
 
         log.info("ActionLog.getCurrentUser.end");
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .roles(user.getRoles().stream().map(RoleEntity::getName).toList())
-                .createdAt(user.getCreatedAt())
-                .lastLoginAt(lastLogin)
-                .build();
+        return UserMapper.INSTANCE.toDto(user, lastLogin);
     }
 }

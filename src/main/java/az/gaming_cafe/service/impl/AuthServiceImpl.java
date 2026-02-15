@@ -6,6 +6,7 @@ import az.gaming_cafe.config.AppProperties;
 import az.gaming_cafe.config.JwtProperties;
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
+import az.gaming_cafe.mapper.AuthMapper;
 import az.gaming_cafe.model.dto.request.ForgotPasswordRequestDto;
 import az.gaming_cafe.model.dto.request.RefreshTokenRequestDto;
 import az.gaming_cafe.model.dto.request.ResetPasswordRequestDto;
@@ -104,14 +105,8 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(refreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.signIn.end");
-        return SignInResponseDto.builder()//fixme move to mapper
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .accessToken(token)
-                .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
-                .build();
+
+        return AuthMapper.INSTANCE.toSignInResponse(user, token, refreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
     }
 
     @Transactional
@@ -139,14 +134,8 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(refreshTokenData.getJti(), context, savedUser);
 
         log.info("ActionLog.signUp.end");
-        return SignUpResponseDto.builder()//fixme move to mapper
-                .id(savedUser.getId())
-                .username(savedUser.getUsername())
-                .email(savedUser.getEmail())
-                .accessToken(token)
-                .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
-                .build();
+
+        return AuthMapper.INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
     }
 
     @Transactional
@@ -204,11 +193,8 @@ public class AuthServiceImpl implements AuthService {
         saveRefreshTokenJti(newRefreshTokenData.getJti(), context, user);
 
         log.info("ActionLog.refreshToken.end");
-        return RefreshTokenResponseDto.builder()//fixme move to mapper
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
-                .build();
+
+        return AuthMapper.INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
     }
 
     @Transactional
@@ -297,7 +283,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("ActionLog.verifyReset.end");
         boolean isOk = !resetToken.isUsed() && resetToken.getExpiryDate().isAfter(LocalDateTime.now());
 
-        return TokenVerifyResponseDto.builder().isValid(isOk).build();//fixme move to mapper
+        return AuthMapper.INSTANCE.toTokenVerifyResponse(isOk);
     }
 
     @Transactional
@@ -328,7 +314,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setJti(jti);
         refreshTokenEntity.setUser(user);
         refreshTokenEntity.setExpiryDate(
-                LocalDateTime.now().plusSeconds(jwtProperties.refreshTokenExpiration() / 1000)
+                LocalDateTime.now().plusSeconds(jwtProperties.accessTokenExpiration() / 1000)
         );
         refreshTokenEntity.setIpAddress(ctx.getIpAddress());
         refreshTokenEntity.setUserAgent(ctx.getUserAgent());
