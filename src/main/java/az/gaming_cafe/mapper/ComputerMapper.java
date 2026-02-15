@@ -3,31 +3,39 @@ package az.gaming_cafe.mapper;
 import az.gaming_cafe.model.dto.request.ComputerRequestDto;
 import az.gaming_cafe.model.dto.response.ComputerResponseDto;
 import az.gaming_cafe.model.entity.ComputerEntity;
-import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface ComputerMapper {
 
+    ComputerMapper INSTANCE = Mappers.getMapper(ComputerMapper.class);
+
     List<ComputerResponseDto> toDtoList(List<ComputerEntity> computers);
+
     ComputerResponseDto toDto(ComputerEntity computer);
-    @Mapping(target = "createdAt",ignore = true)
-    @Mapping(target = "updatedAt",ignore = true)
-    @Mapping(target = "createdBy",ignore = true)
-    @Mapping(target = "updatedBy",ignore = true)
-    @Mapping(target = "id",ignore = true)
+
+    @Mappings({
+            @Mapping(target = "createdAt", ignore = true),
+            @Mapping(target = "updatedAt", ignore = true),
+            @Mapping(target = "createdBy", ignore = true),
+            @Mapping(target = "updatedBy", ignore = true),
+            @Mapping(target = "id", ignore = true)
+    })
     ComputerEntity toEntity(ComputerRequestDto computerRequestDto);
-    @Mapping(target = "createdAt",ignore = true)
-    @Mapping(target = "updatedAt",ignore = true)
-    @Mapping(target = "createdBy",ignore = true)
-    @Mapping(target = "updatedBy",ignore = true)
-    @Mapping(target = "id",ignore = true)
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+
+    @Mappings({
+            @Mapping(target = "createdAt", ignore = true),
+            @Mapping(target = "updatedAt", ignore = true),
+            @Mapping(target = "createdBy", ignore = true),
+            @Mapping(target = "updatedBy", ignore = true),
+            @Mapping(target = "id", ignore = true)
+    })
     void updateComputerFromDto(ComputerRequestDto computerRequestDto, @MappingTarget ComputerEntity computerEntity);
 }
