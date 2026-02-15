@@ -8,11 +8,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ComputerMapper {
+
+    ComputerMapper INSTANCE = Mappers.getMapper(ComputerMapper.class);
 
     List<ComputerResponseDto> toDtoList(List<ComputerEntity> computers);
 

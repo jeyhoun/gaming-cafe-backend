@@ -28,7 +28,6 @@ import az.gaming_cafe.security.rbac.JwtUtils;
 import az.gaming_cafe.service.AuthService;
 import az.gaming_cafe.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,8 +41,6 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
-
-    private final AuthMapper INSTANCE = Mappers.getMapper(AuthMapper.class);
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -114,7 +111,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.signIn.end");
 
-        return INSTANCE.toSignInResponse(user, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
+        return AuthMapper.INSTANCE.toSignInResponse(user, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -144,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.signUp.end");
 
-        return INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
+        return AuthMapper.INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -204,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.refreshToken.end");
 
-        return INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
+        return AuthMapper.INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -294,7 +291,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("ActionLog.verifyReset.end");
         boolean isOk = !resetToken.isUsed() && resetToken.getExpiryDate().isAfter(LocalDateTime.now());
 
-        return INSTANCE.toTokenVerifyResponse(isOk);
+        return AuthMapper.INSTANCE.toTokenVerifyResponse(isOk);
     }
 
     @Override
