@@ -2,14 +2,15 @@ package az.gaming_cafe.service.impl;
 
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
+import az.gaming_cafe.mapper.UserMapper;
 import az.gaming_cafe.model.dto.response.UserResponseDto;
 import az.gaming_cafe.model.entity.BaseAuditEntity;
-import az.gaming_cafe.model.entity.RoleEntity;
 import az.gaming_cafe.model.entity.UserEntity;
 import az.gaming_cafe.repository.UserHistoryRepository;
 import az.gaming_cafe.repository.UserRepository;
 import az.gaming_cafe.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+
+    private final UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     private final UserRepository userRepository;
     private final UserHistoryRepository userHistoryRepository;
@@ -45,13 +48,7 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
 
         log.info("ActionLog.getCurrentUser.end");
-        return UserResponseDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .roles(user.getRoles().stream().map(RoleEntity::getName).toList())
-                .createdAt(user.getCreatedAt())
-                .lastLoginAt(lastLogin)
-                .build();
+
+        return INSTANCE.toDto(user, lastLogin);
     }
 }

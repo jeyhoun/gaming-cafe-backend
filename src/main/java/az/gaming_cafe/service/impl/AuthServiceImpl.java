@@ -43,6 +43,8 @@ import java.util.UUID;
 @Service
 public class AuthServiceImpl implements AuthService {
 
+    private final AuthMapper INSTANCE = Mappers.getMapper(AuthMapper.class);
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -51,7 +53,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
     private final EmailService emailService;
-    private final AuthMapper authMapper = Mappers.getMapper(AuthMapper.class);
 
     @Value("${jwt.access-token.expiration:900000}")
     private long accessTokenExpiration;
@@ -113,10 +114,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.signIn.end");
 
-        return authMapper.toSignInResponse(user,
-                token,
-                refreshTokenData.getRefreshToken(),
-                accessTokenExpiration / 1000);
+        return INSTANCE.toSignInResponse(user, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -146,10 +144,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.signUp.end");
 
-        return authMapper.toSignUpResponse(savedUser,
-                token,
-                refreshTokenData.getRefreshToken(),
-                accessTokenExpiration / 1000);
+        return INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -209,9 +204,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("ActionLog.refreshToken.end");
 
-        return authMapper.toRefreshTokenResponse(newAccessToken,
-                newRefreshTokenData.getRefreshToken(),
-                accessTokenExpiration / 1000);
+        return INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.getRefreshToken(), accessTokenExpiration / 1000);
     }
 
     @Override
@@ -301,7 +294,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("ActionLog.verifyReset.end");
         boolean isOk = !resetToken.isUsed() && resetToken.getExpiryDate().isAfter(LocalDateTime.now());
 
-        return authMapper.toTokenVerifyResponse(isOk);
+        return INSTANCE.toTokenVerifyResponse(isOk);
     }
 
     @Override
