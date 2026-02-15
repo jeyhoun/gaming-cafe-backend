@@ -4,7 +4,6 @@ import az.gaming_cafe.TrackUserAction;
 import az.gaming_cafe.component.dto.RequestContext;
 import az.gaming_cafe.config.AppProperties;
 import az.gaming_cafe.config.JwtProperties;
-import az.gaming_cafe.config.SecurityProperties;
 import az.gaming_cafe.exception.ApplicationException;
 import az.gaming_cafe.exception.data.ErrorCode;
 import az.gaming_cafe.model.dto.request.ForgotPasswordRequestDto;
@@ -30,10 +29,10 @@ import az.gaming_cafe.security.rbac.JwtUtils;
 import az.gaming_cafe.service.AuthService;
 import az.gaming_cafe.service.EmailService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -51,10 +50,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
     private final JwtProperties jwtProperties;
-    private final SecurityProperties securityProperties;
     private final AppProperties appProperties;
     private final EmailService emailService;
-
 
 
     public AuthServiceImpl(UserRepository userRepository,
@@ -65,7 +62,6 @@ public class AuthServiceImpl implements AuthService {
                            PasswordEncoder passwordEncoder,
                            JwtUtils jwtUtil,
                            JwtProperties jwtProperties,
-                           SecurityProperties securityProperties,
                            AppProperties appProperties,
                            EmailService emailService) {
         this.userRepository = userRepository;
@@ -76,12 +72,10 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.jwtProperties = jwtProperties;
-        this.securityProperties = securityProperties;
         this.appProperties = appProperties;
         this.emailService = emailService;
     }
 
-    @Override
     @Transactional
     @TrackUserAction
     public SignInResponseDto signIn(SignInRequestDto request, RequestContext context) {
@@ -116,11 +110,10 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .accessToken(token)
                 .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
+                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
                 .build();
     }
 
-    @Override
     @Transactional
     @TrackUserAction
     public SignUpResponseDto signUp(SignUpRequestDto request, RequestContext context) {
@@ -152,11 +145,10 @@ public class AuthServiceImpl implements AuthService {
                 .email(savedUser.getEmail())
                 .accessToken(token)
                 .refreshToken(refreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
+                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
                 .build();
     }
 
-    @Override
     @Transactional
     @TrackUserAction
     public RefreshTokenResponseDto refreshToken(RefreshTokenRequestDto request, RequestContext context) {
@@ -195,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         int currentUseCount = refreshTokenEntity.getUseCount();
-        if (currentUseCount >= securityProperties.getMaxRefreshTokenUse()) {
+        if (currentUseCount >= jwtProperties.maxRefreshTokenUse()) {
             refreshTokenRepository.revokeAllUserTokens(user.getId());
             throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
@@ -215,11 +207,10 @@ public class AuthServiceImpl implements AuthService {
         return RefreshTokenResponseDto.builder()//fixme move to mapper
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshTokenData.getRefreshToken())
-                .expiresIn(jwtProperties.getAccessTokenExpiration() / 1000)
+                .expiresIn(jwtProperties.accessTokenExpiration() / 1000)
                 .build();
     }
 
-    @Override
     @Transactional
     public void signOut() {
         log.info("ActionLog.signOut.start");
@@ -287,7 +278,7 @@ public class AuthServiceImpl implements AuthService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        String resetLink = appProperties.getFrontendUrl() + "/reset-password?token=" + token;
+        String resetLink = appProperties.frontendUrl() + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
         log.info("ActionLog.forgotPassword.end");
     }
@@ -309,7 +300,6 @@ public class AuthServiceImpl implements AuthService {
         return TokenVerifyResponseDto.builder().isValid(isOk).build();//fixme move to mapper
     }
 
-    @Override
     @Transactional
     public void resetPassword(ResetPasswordRequestDto request) {
         log.info("ActionLog.resetPassword.start");
@@ -338,7 +328,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setJti(jti);
         refreshTokenEntity.setUser(user);
         refreshTokenEntity.setExpiryDate(
-                LocalDateTime.now().plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000)
+                LocalDateTime.now().plusSeconds(jwtProperties.refreshTokenExpiration() / 1000)
         );
         refreshTokenEntity.setIpAddress(ctx.getIpAddress());
         refreshTokenEntity.setUserAgent(ctx.getUserAgent());
