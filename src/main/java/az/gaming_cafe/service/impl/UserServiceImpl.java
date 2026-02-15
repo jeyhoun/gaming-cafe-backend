@@ -32,11 +32,8 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponseDto getCurrentUser() {
         log.info("ActionLog.getCurrentUser.start");
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-
-        UserEntity user = userRepository.findByUsername(username)
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
 
         LocalDateTime lastLogin = userHistoryRepository

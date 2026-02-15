@@ -29,7 +29,9 @@ import az.gaming_cafe.repository.UserRepository;
 import az.gaming_cafe.security.rbac.JwtUtils;
 import az.gaming_cafe.service.AuthService;
 import az.gaming_cafe.service.EmailService;
+import az.gaming_cafe.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,13 +102,12 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepository.revokeAllUserTokens(user.getId());
 
         String token = jwtUtil.generateAccessToken(user);
-        JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
+        JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(user.getId());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), context, user);
+        saveRefreshTokenJti(refreshTokenData.jti(), context, user);
 
         log.info("ActionLog.signIn.end");
-
-        return AuthMapper.INSTANCE.toSignInResponse(user, token, refreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
+        return AuthMapper.INSTANCE.toSignInResponse(user, token, refreshTokenData.refreshToken(), CommonUtils.calcTokenExpiration(jwtProperties.accessTokenExpiration()));
     }
 
     @Transactional
@@ -129,13 +130,13 @@ public class AuthServiceImpl implements AuthService {
         UserEntity savedUser = userRepository.save(newUser);
 
         String token = jwtUtil.generateAccessToken(savedUser);
-        JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(savedUser.getUsername());
+        JwtUtils.TokenWithJti refreshTokenData = jwtUtil.generateRefreshToken(savedUser.getId());
 
-        saveRefreshTokenJti(refreshTokenData.getJti(), context, savedUser);
+        saveRefreshTokenJti(refreshTokenData.jti(), context, savedUser);
 
         log.info("ActionLog.signUp.end");
 
-        return AuthMapper.INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
+        return AuthMapper.INSTANCE.toSignUpResponse(savedUser, token, refreshTokenData.refreshToken(), CommonUtils.calcTokenExpiration(jwtProperties.accessTokenExpiration()));
     }
 
     @Transactional
@@ -165,13 +166,13 @@ public class AuthServiceImpl implements AuthService {
             throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        if (isExpired(refreshTokenEntity.getExpiryDate())) {
+        if (CommonUtils.isExpired(refreshTokenEntity.getExpiryDate())) {
             refreshTokenRepository.delete(refreshTokenEntity);
             throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         UserEntity user = refreshTokenEntity.getUser();
-        if (!jwtUtil.isTokenValid(refreshToken, user.getUsername())) {
+        if (!jwtUtil.isTokenValid(refreshToken, user.getId())) {
             throw new ApplicationException(ErrorCode.INVALID_CREDENTIALS);
         }
 
@@ -185,28 +186,25 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setLastUsedAt(LocalDateTime.now());
 
         String newAccessToken = jwtUtil.generateAccessToken(user);
-        JwtUtils.TokenWithJti newRefreshTokenData = jwtUtil.generateRefreshToken(user.getUsername());
+        JwtUtils.TokenWithJti newRefreshTokenData = jwtUtil.generateRefreshToken(user.getId());
 
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        saveRefreshTokenJti(newRefreshTokenData.getJti(), context, user);
+        saveRefreshTokenJti(newRefreshTokenData.jti(), context, user);
 
         log.info("ActionLog.refreshToken.end");
 
-        return AuthMapper.INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.getRefreshToken(), jwtProperties.accessTokenExpiration() / 1000);
+        return AuthMapper.INSTANCE.toRefreshTokenResponse(newAccessToken, newRefreshTokenData.refreshToken(), CommonUtils.calcTokenExpiration(jwtProperties.accessTokenExpiration()));
     }
 
     @Transactional
     public void signOut() {
         log.info("ActionLog.signOut.start");
-
-        String username = org.springframework.security.core.context.SecurityContextHolder
-                .getContext().getAuthentication().getName();
-
-        UserEntity user = userRepository.findByUsername(username)
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn("ActionLog.signOut.userNotFound username: {}", username);
+                    log.warn("ActionLog.signOut.userNotFound userID: {}", userId);
                     return new ApplicationException(ErrorCode.USER_NOT_FOUND);
                 });
 
@@ -314,15 +312,11 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setJti(jti);
         refreshTokenEntity.setUser(user);
         refreshTokenEntity.setExpiryDate(
-                LocalDateTime.now().plusSeconds(jwtProperties.accessTokenExpiration() / 1000)
+                LocalDateTime.now().plusSeconds(CommonUtils.calcTokenExpiration(jwtProperties.accessTokenExpiration()))
         );
         refreshTokenEntity.setIpAddress(ctx.getIpAddress());
         refreshTokenEntity.setUserAgent(ctx.getUserAgent());
         refreshTokenRepository.save(refreshTokenEntity);
         log.info("ActionLog.saveRefreshTokenJti.end");
-    }
-
-    private boolean isExpired(LocalDateTime expiryDate) {
-        return LocalDateTime.now().isAfter(expiryDate);
     }
 }

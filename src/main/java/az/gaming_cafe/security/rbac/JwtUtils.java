@@ -1,11 +1,11 @@
 package az.gaming_cafe.security.rbac;
 
+import az.gaming_cafe.config.JwtProperties;
 import az.gaming_cafe.model.entity.RoleEntity;
 import az.gaming_cafe.model.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -26,64 +26,44 @@ public class JwtUtils {
     private static final String CLAIM_JTI = "jti";
     private static final String CLAIM_ROLES = "roles";
 
-    @Value("${jwt.access-token.expiration:900000}") // 15 minutes
-    private long accessTokenExpiration;
-
-    @Value("${jwt.refresh-token.expiration:604800000}")// 7 days
-    private long refreshTokenExpiration;
-
     private final SecretKey key;
+    private final JwtProperties jwtProperties;
 
-    public static class TokenWithJti {
-        private final String refreshToken;
-        private final String jti;
-
-        public TokenWithJti(String token, String claimJti) {
-            this.refreshToken = token;
-            this.jti = claimJti;
-        }
-
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-
-        public String getJti() {
-            return jti;
-        }
+    public JwtUtils(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+        this.key = Keys.hmacShaKeyFor(jwtProperties.secretKey().getBytes(StandardCharsets.UTF_8));
     }
 
-    public JwtUtils(@Value("${jwt.secret-key}") String secretKey) {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-    }
+    public record TokenWithJti(String refreshToken, String jti) {}
 
-    public TokenWithJti generateRefreshToken(String username) {
+    public TokenWithJti generateRefreshToken(Long userId) {
         String jti = UUID.randomUUID().toString();
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("tokenType", "refresh");
         claims.put(CLAIM_JTI, jti);
 
-        String token = generateToken(username, claims, refreshTokenExpiration);
+        String token = generateToken(userId, claims, jwtProperties.refreshTokenExpiration());
 
         return new TokenWithJti(token, jti);
     }
 
     public String generateAccessToken(UserEntity user) {
-        return generateAccessTokenWithJti(user).getRefreshToken();
+        return generateAccessTokenWithJti(user).refreshToken();
     }
 
     public TokenWithJti generateAccessTokenWithJti(UserEntity user) {
         Map<String, Object> claims = buildClaims(user);
         String jti = UUID.randomUUID().toString();
         claims.put(CLAIM_JTI, jti);
-        String token = generateToken(user.getUsername(), claims, accessTokenExpiration);
+        String token = generateToken(user.getId(), claims, jwtProperties.accessTokenExpiration());
         return new TokenWithJti(token, jti);
     }
 
-    public String generateToken(String username, Map<String, Object> extraClaims, long expiration) {
+    public String generateToken(Long userId, Map<String, Object> extraClaims, long expiration) {
         return Jwts.builder()
                 .claims(extraClaims)
-                .subject(username)
+                .subject(String.valueOf(userId))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
@@ -108,10 +88,10 @@ public class JwtUtils {
         return List.of();
     }
 
-    public boolean isTokenValid(String token, String username) {
+    public boolean isTokenValid(String token, Long userId) {
         try {
-            final String extractedUsername = extractUsername(token);
-            return extractedUsername.equals(username) && !isTokenExpired(token);
+            final Long extractedUserId = extractUserId(token);
+            return extractedUserId.equals(userId) && !isTokenExpired(token);
             //CHECKSTYLE:OFF
         } catch (Exception e) {
             return false;
@@ -122,8 +102,8 @@ public class JwtUtils {
         return extractAllClaims(token).get(CLAIM_JTI, String.class);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public Long extractUserId(String token) {
+        return Long.valueOf(extractClaim(token, Claims::getSubject));
     }
 
     public Date extractExpiration(String token) {
