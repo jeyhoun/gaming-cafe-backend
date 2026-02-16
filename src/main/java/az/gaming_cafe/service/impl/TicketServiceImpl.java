@@ -32,8 +32,8 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void create(CreateTicketRequestDto request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity user = userRepository.findByUsername(username)
+        Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.USER_NOT_FOUND));
 
         TicketEntity ticket = new TicketEntity();
